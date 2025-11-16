@@ -69,8 +69,11 @@ lint:
 lint-fix:
     golangci-lint run --fix ./...
 
+pre-commit:
+    pre-commit run --all-files
+
 # Run all checks and tests (CI)
-ci-check: lint test
+ci-check: pre-commit lint test
 
 # Update dependencies
 update-deps:
