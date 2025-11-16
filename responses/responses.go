@@ -90,7 +90,7 @@ func GetErrorGuidance(code int) string {
 
 // DateResponse is used repeatedly in places where Pandora returns a JSON object
 // called dateCreated.
-// Most of the data is rubish without a little processing but you can use GetDate()
+// Most of the data is rubbish without a little processing but you can use GetDate()
 // and also Time is just a nice UNIX epoch.
 type DateResponse struct {
 	Nanos          int `json:"nano"`
