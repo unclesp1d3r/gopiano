@@ -1,14 +1,58 @@
 /*
-Package gopiano provides a thin wrapper library around the Pandora.com client API.
+Package gopiano provides a thin wrapper library around Pandora.com's unofficial, reverse-engineered legacy JSON API (v5).
 
 This client API has been reverse engineered and documentation is available at
-http://pan-do-ra-api.wikia.com/wiki/Json/5.
+https://6xq.net/pandora-apidoc/json/ and https://6xq.net/pandora-apidoc/rest/.
 
 The package provides a Client struct with a myriad of methods which interact with the
 Pandora JSON API's own methods. Each method returns a struct of the parsed JSON data and an error.
 All of the responses that these methods return can be found in the responses subpackage. There
 is also a requests subpackage but mostly you don't need to bother with those; they get instantiated
 by these client methods.
+
+# Authentication Flow
+
+All API interactions require a two-step authentication process:
+
+1. Step 1: Call AuthPartnerLogin() to establish partner session
+  - This obtains partnerAuthToken, partnerID, and syncTime
+  - Required before any other API methods
+
+2. Step 2: Call either AuthUserLogin() for existing users OR UserCreateUser() for new accounts
+  - This obtains userAuthToken and userID
+  - Required before calling user-specific methods
+
+Only after both steps can you call other API methods that require user authentication.
+
+# Quick Start
+
+	client, err := gopiano.NewClient(gopiano.AndroidClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Step 1: Partner login (required first)
+	_, err = client.AuthPartnerLogin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Step 2: User login (for existing users)
+	_, err = client.AuthUserLogin("user@example.com", "password")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Now you can call other methods
+	stations, err := client.UserGetStationList(false)
+
+# Important Notes
+
+- This wraps an unofficial, legacy Pandora API that may be deprecated
+- US-only restrictions due to licensing (requires US IP address)
+- Potential for rate limiting on frequent requests
+- Error code 0 (INTERNAL) typically indicates authentication or validation issues
+- Official Pandora API now uses OAuth2 + GraphQL
 */
 package gopiano
 
@@ -16,6 +60,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -165,6 +210,13 @@ func (c *Client) PandoraCall(protocol, method string, body io.Reader, data inter
 		if message, ok := responses.ErrorCodeMap[errResp.Code]; ok {
 			errResp.Message = message
 		}
+		// Provide additional troubleshooting guidance for error code 0 (INTERNAL)
+		if errResp.Code == 0 {
+			guidance := responses.GetErrorGuidance(errResp.Code)
+			if guidance != "" {
+				errResp.Message = errResp.Message + ". " + guidance
+			}
+		}
 		return errResp
 	}
 
@@ -189,4 +241,28 @@ func (c *Client) BlowfishCall(protocol, method string, body io.Reader, data inte
 // GetSyncTime calculates the SyncTime for each call based on the timeOffset.
 func (c *Client) GetSyncTime() int {
 	return int(time.Now().Add(c.timeOffset).Unix())
+}
+
+// validatePartnerAuthToken checks if partnerAuthToken is set and returns an error if missing.
+// This is used by methods that require partner authentication (e.g., AuthUserLogin, UserCreateUser).
+func (c *Client) validatePartnerAuthToken(operation string) error {
+	if c.partnerAuthToken == "" {
+		return fmt.Errorf(
+			"partner authentication token missing: must call AuthPartnerLogin() first to establish a partner session before %s",
+			operation,
+		)
+	}
+	return nil
+}
+
+// validateUserAuthToken checks if userAuthToken is set and returns an error if missing.
+// This is used by methods that require user authentication (e.g., UserGetStationList, StationGetPlaylist).
+func (c *Client) validateUserAuthToken(operation string) error {
+	if c.userAuthToken == "" {
+		return fmt.Errorf(
+			"user authentication token missing: must call AuthUserLogin() or UserCreateUser() first to establish a user session before %s",
+			operation,
+		)
+	}
+	return nil
 }

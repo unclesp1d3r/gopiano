@@ -13,6 +13,11 @@ import (
 // AuthPartnerLogin establishes a Partner session with provided
 // API username and password and receives a PartnerAuthToken, PartnerID and SyncTime
 // which are stored for later calls.
+//
+// This MUST be called first before any other API methods. It establishes the partner
+// session and obtains authentication tokens. Sets partnerAuthToken, partnerID, and
+// timeOffset on the client. These values are required for subsequent API calls.
+//
 // Calls API method "auth.partnerLogin".
 func (c *Client) AuthPartnerLogin() (*responses.AuthPartnerLogin, error) {
 	requestData := requests.AuthPartnerLogin{
@@ -58,6 +63,9 @@ func (c *Client) AuthPartnerLogin() (*responses.AuthPartnerLogin, error) {
 // before you proceed.
 // Calls API method "auth.userLogin".
 func (c *Client) AuthUserLogin(username, password string) (*responses.AuthUserLogin, error) {
+	if err := c.validatePartnerAuthToken("logging in a user"); err != nil {
+		return nil, err
+	}
 	requestData := requests.AuthUserLogin{
 		PartnerAuthToken: c.partnerAuthToken,
 		LoginType:        "user",
