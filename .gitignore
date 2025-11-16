@@ -1,61 +1,174 @@
-# Binaries for programs and plugins
+# Go build artifacts
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
 go.work
-go.work.sum
 
-# Build output
-/dist/
-/build/
-/bin/
+# Go build directories
+dist/
+build/
+bin/
 
-# IDE and editor files
+# GoReleaser and packaging artifacts
+packaging/completions/
+packaging/*.1
+
+# Go coverage and profiling
+coverage.txt
+*.cover
+*.prof
+coverage.html
+coverage.out
+*.coverprofile
+
+# IDE and Editor files
+## IntelliJ IDEA
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/aws.xml
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+.idea/**/gradle.xml
+.idea/**/libraries
+.idea/**/mongoSettings.xml
+*.iws
+.idea_modules/
+atlassian-ide-plugin.xml
+.idea/replstate.xml
+.idea/sonarlint/
+.idea/httpRequests
+.idea/caches/build_file_checksums.ser
+cmake-build-*/
+out/
+
+## VS Code
 .vscode/
-.idea/
+*.code-workspace
+
+## Vim
 *.swp
 *.swo
-*.orig
-*.tmp
 *~
+
+## Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows system files
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+# Linux system files
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
-# Log files
+# Node.js (for documentation tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Python (for development tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.venv.bak/
+venv.bak/
+
+# Documentation build artifacts
+site/
+docs/_build/
+docs/.doctrees/
+docs/_static/
+docs/_templates/
+
+
+# Logs and reports
 *.log
-
-# Coverage reports
-coverage.out
-coverage.html
-profile.out
+lint_report.json
+*.report
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.backup
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backup repositories
+*-backup.git/
+
+# Security scanning artifacts
+sbom.spdx.json
+*.sarif
+cosign.bundle
+snyk.sarif
+snyk-code.sarif
+results.sarif
