@@ -22,9 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/blowfish" //nolint:staticcheck // required by Pandora API
-
 	"github.com/cellofellow/gopiano/responses"
+	"golang.org/x/crypto/blowfish" //nolint:staticcheck // required by Pandora API
 )
 
 // ClientDescription describes a particular type of client to emulate.
@@ -150,7 +149,7 @@ func (c *Client) PandoraCall(protocol, method string, body io.Reader, data inter
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close() //nolint:errcheck // Error from closing response body in defer is not actionable
+	defer resp.Body.Close()
 
 	var errResp responses.PandoraError
 	responseBody, err := io.ReadAll(resp.Body)

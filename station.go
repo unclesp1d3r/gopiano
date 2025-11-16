@@ -206,7 +206,10 @@ func (c *Client) StationGetPlaylist(stationToken string) (*responses.StationGetP
 // Argument stationToken is obtained from Client.UserGetStationList
 // Argument includeExtendedAttributes will include music seed and feedback IDs in response.
 // Calls API method "station.getStation".
-func (c *Client) StationGetStation(stationToken string, includeExtendedAttributes bool) (*responses.StationGetStation, error) {
+func (c *Client) StationGetStation(
+	stationToken string,
+	includeExtendedAttributes bool,
+) (*responses.StationGetStation, error) {
 	requestData := requests.StationGetStation{
 		StationToken:              stationToken,
 		IncludeExtendedAttributes: includeExtendedAttributes,

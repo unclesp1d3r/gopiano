@@ -39,7 +39,7 @@ func TestHTTPLeak(t *testing.T) {
 
 	// Make multiple HTTP calls to test for resource leaks
 	const numCalls = 50
-	for i := 0; i < numCalls; i++ {
+	for i := range numCalls {
 		var result interface{}
 		err := client.PandoraCall("http://", "test.method", strings.NewReader("{}"), &result)
 		if err != nil {

@@ -1,3 +1,5 @@
+//nolint:gochecknoglobals // part of public API
+
 // Package responses provides structs used with json.Unmarshal in processing responses from the Pandora API.
 package responses
 
@@ -114,7 +116,7 @@ type AuthUserLogin struct {
 		CanListen                   bool   `json:"canListen"`
 		HasAudioAds                 bool   `json:"hasAudioAds"`
 		IsCapped                    bool   `json:"isCapped,omitempty"`
-		ListeningTimeoutAlertMsgUri string `json:"listeningTimeoutAlertMsgUri"` //nolint:revive // matches Pandora API
+		ListeningTimeoutAlertMsgUri string `json:"listeningTimeoutAlertMsgUri"` //nolint:revive,staticcheck // matches Pandora API
 		ListeningTimeoutMinutes     string `json:"listeningTimeoutMinutes"`
 		MaxStationsAllowed          int    `json:"maxStationsAllowed"`
 		MinimumAdRefreshInterval    int    `json:"minimumAdRefreshInterval"`
