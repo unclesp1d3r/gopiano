@@ -81,8 +81,10 @@ Help improve test coverage:
 3. **Add upstream remote**:
 
    ```sh
-   git remote add upstream https://github.com/cellofellow/gopiano.git
+   git remote add upstream https://github.com/unclesp1d3r/gopiano.git
    ```
+
+   **Note**: The `gopiano` project originated from `https://github.com/cellofellow/gopiano` but is now maintained under `https://github.com/unclesp1d3r/gopiano`. Please use the latter as the canonical upstream repository for contributions.
 
 4. **Install dependencies** (if any):
 

@@ -6,8 +6,8 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/cellofellow/gopiano)](https://goreportcard.com/report/github.com/cellofellow/gopiano)
-[![GoDoc](https://godoc.org/github.com/cellofellow/gopiano?status.svg)](https://godoc.org/github.com/cellofellow/gopiano)
+[![Go Report Card](https://goreportcard.com/badge/github.com/unclesp1d3r/gopiano)](https://goreportcard.com/report/github.com/unclesp1d3r/gopiano)
+[![GoDoc](https://pkg.go.dev/badge/github.com/unclesp1d3r/gopiano.svg)](https://pkg.go.dev/github.com/unclesp1d3r/gopiano)
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 [![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 

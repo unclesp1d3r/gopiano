@@ -22,7 +22,7 @@ Instead, please report them via one of the following methods:
 
 1. **GitHub Security Advisories** (Preferred): Use the [Security tab](https://github.com/unclesp1d3r/gopiano/security/advisories) in this repository to create a private security advisory.
 
-2. **Email**: Contact the maintainer directly (see repository maintainer information).
+2. **Direct Contact**: If you prefer not to use GitHub Security Advisories, you can contact the maintainer directly via their [GitHub profile](https://github.com/unclesp1d3r) using GitHub's private contact feature.
 
 ### What to Include
 
