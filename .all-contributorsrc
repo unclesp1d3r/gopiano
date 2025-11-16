@@ -1,16 +1,28 @@
 {
-    "projectName": "gopiano",
-    "projectOwner": "unclesp1d3r",
-    "repoType": "github",
-    "repoHost": "https://github.com",
-    "files": [
-        "CONTRIBUTORS.md",
-        "README.md"
-    ],
-    "imageSize": 100,
-    "commit": true,
-    "commitConvention": "angular",
-    "contributors": [],
-    "contributorsPerLine": 7,
-    "linkToUsage": false
+  "projectName": "gopiano",
+  "projectOwner": "unclesp1d3r",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "CONTRIBUTORS.md",
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "cellofellow",
+      "name": "Joshua Gardner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2760790?v=4",
+      "profile": "http://www.jgardner.tech/",
+      "contributions": [
+        "code",
+        "userTesting",
+        "projectManagement"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
 }

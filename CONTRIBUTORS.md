@@ -24,8 +24,17 @@ Contributions to gopiano can take many forms:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.jgardner.tech/"><img src="https://avatars.githubusercontent.com/u/2760790?v=4?s=100" width="100px;" alt="Joshua Gardner"/><br /><sub><b>Joshua Gardner</b></sub></a><br /><a href="https://github.com/unclesp1d3r/gopiano/commits?author=cellofellow" title="Code">💻</a> <a href="#userTesting-cellofellow" title="User Testing">📓</a> <a href="#projectManagement-cellofellow" title="Project Management">📆</a></td>
+    </tr>
+  </tbody>
+</table>
+
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 - **Joshua Gardner** ([@cellofellow](https://github.com/cellofellow)) - Original creator and author of gopiano
