@@ -12,6 +12,9 @@ import (
 // to the premium Pandora One service.
 // Calls API method "user.canSubscribe".
 func (c *Client) UserCanSubscribe() (*responses.UserCanSubscribe, error) {
+	if err := c.validateUserAuthToken("checking subscription status"); err != nil {
+		return nil, err
+	}
 	requestData := requests.UserCanSubscribe{
 		UserAuthToken: c.userAuthToken,
 		SyncTime:      c.GetSyncTime(),
@@ -31,14 +34,33 @@ func (c *Client) UserCanSubscribe() (*responses.UserCanSubscribe, error) {
 }
 
 // UserCreateUser creates a new Pandora user.
-// Argument username must be in the form of an email address. gender must be either "male" or "female".
-// countryCode must be "US".
+//
+// Prerequisite: Must call AuthPartnerLogin() first to obtain a partner authentication token.
+// This function establishes user authentication and sets userAuthToken on the client.
+//
+// Parameter requirements:
+//   - username must be a valid email address
+//   - gender must be exactly "male" or "female"
+//   - countryCode must be "US" (API restriction)
+//   - zipCode must be a valid US ZIP code
+//   - birthYear must meet minimum age requirements
+//
+// Known limitations:
+//   - Requires US IP address due to licensing restrictions
+//   - May fail with rate limiting if called too frequently
+//   - Legacy API endpoint that may be deprecated
+//
+// See examples/create_user/ for a complete usage example.
+//
 // Calls API method "user.createUser".
 func (c *Client) UserCreateUser(
 	username, password, gender, countryCode string,
 	zipCode, birthYear int,
 	emailOptin bool,
 ) (*responses.UserCreateUser, error) {
+	if err := c.validatePartnerAuthToken("creating a user"); err != nil {
+		return nil, err
+	}
 	requestData := requests.UserCreateUser{
 		PartnerAuthToken: c.partnerAuthToken,
 		AccountType:      "registered",
@@ -73,6 +95,9 @@ func (c *Client) UserCreateUser(
 // UserEmailPassword resends the registration email.
 // Calls API method "user.emailPassword".
 func (c *Client) UserEmailPassword(username string) error {
+	if err := c.validatePartnerAuthToken("resending registration email"); err != nil {
+		return err
+	}
 	requestData := requests.UserEmailPassword{
 		Username:         username,
 		PartnerAuthToken: c.partnerAuthToken,
@@ -91,6 +116,9 @@ func (c *Client) UserEmailPassword(username string) error {
 // Also see BookmarkAddArtistBookmark and BookmarkAddSongBookmark.
 // Calls API method "user.getBookmarks".
 func (c *Client) UserGetBookmarks() (*responses.UserGetBookmarks, error) {
+	if err := c.validateUserAuthToken("retrieving bookmarks"); err != nil {
+		return nil, err
+	}
 	requestData := requests.UserGetBookmarks{
 		UserAuthToken: c.userAuthToken,
 		SyncTime:      c.GetSyncTime(),
@@ -112,6 +140,9 @@ func (c *Client) UserGetBookmarks() (*responses.UserGetBookmarks, error) {
 // UserGetStationList gets the list of a user's stations.
 // Calls API method "user.getStationList".
 func (c *Client) UserGetStationList(includeStationArtURL bool) (*responses.UserGetStationList, error) {
+	if err := c.validateUserAuthToken("getting station list"); err != nil {
+		return nil, err
+	}
 	requestData := requests.UserGetStationList{
 		UserAuthToken:        c.userAuthToken,
 		SyncTime:             c.GetSyncTime(),
@@ -135,6 +166,9 @@ func (c *Client) UserGetStationList(includeStationArtURL bool) (*responses.UserG
 // UserGetStationListChecksum returns the checksum of the user's station list.
 // Calls API method "user.getStationListChecksum".
 func (c *Client) UserGetStationListChecksum() (*responses.UserGetStationListChecksum, error) {
+	if err := c.validateUserAuthToken("getting station list checksum"); err != nil {
+		return nil, err
+	}
 	requestData := requests.UserGetStationListChecksum{
 		UserAuthToken: c.userAuthToken,
 		SyncTime:      c.GetSyncTime(),
@@ -157,6 +191,9 @@ func (c *Client) UserGetStationListChecksum() (*responses.UserGetStationListChec
 // UserSetQuickMix selects the stations that should be in the special QuickMix station.
 // Calls API method "user.setQuickMix".
 func (c *Client) UserSetQuickMix(stationIDs []string) error {
+	if err := c.validateUserAuthToken("setting QuickMix"); err != nil {
+		return err
+	}
 	requestData := requests.UserSetQuickMix{
 		QuickMixStationIDs: stationIDs,
 		UserAuthToken:      c.userAuthToken,
@@ -174,6 +211,9 @@ func (c *Client) UserSetQuickMix(stationIDs []string) error {
 // UserSleepSong marks a song to not be played again for 1 month.
 // Calls API method "user.sleepSong".
 func (c *Client) UserSleepSong(trackToken string) error {
+	if err := c.validateUserAuthToken("sleeping a song"); err != nil {
+		return err
+	}
 	requestData := requests.UserSleepSong{
 		TrackToken:    trackToken,
 		UserAuthToken: c.userAuthToken,

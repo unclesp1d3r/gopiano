@@ -66,6 +66,8 @@ Help improve test coverage:
 - Git
 - Basic familiarity with Go and the project structure
 - [just](https://github.com/casey/just) (optional, but recommended for running common tasks)
+- Valid Pandora account credentials (for integration tests)
+- Legal rights to access the Pandora API for testing purposes
 
 ### Setup
 
@@ -277,6 +279,18 @@ See [AGENTS.md](AGENTS.md) for detailed patterns and examples.
 - Use nolint directives sparingly with clear justification
 
 ## Testing Guidelines
+
+### Testing with Valid Credentials
+
+**Credential Requirements**: Integration tests require valid Pandora account credentials to make actual API calls. Contributors must have legal rights to access the Pandora API for testing purposes.
+
+**Legal Responsibility**: Contributors are responsible for ensuring their testing activities comply with Pandora's Terms of Service. This includes verifying that you have the legal right to use the credentials and access the API for testing purposes.
+
+**Terms of Service Compliance**: All testing activities must comply with Pandora's Terms of Service. Automated testing should be conducted responsibly and should not abuse or overload the API.
+
+**Reference Implementation Context**: Remember that this is a reference implementation for educational and research purposes. Testing should be conducted in a manner consistent with this purpose and should not violate any terms of service or applicable laws.
+
+**Credential Security**: Integration tests require credentials (see the "Integration Tests" section below), but credentials should **never** be committed to version control. Use environment variables or secure credential management systems for test credentials.
 
 ### Unit Tests
 

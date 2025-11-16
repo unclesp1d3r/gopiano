@@ -12,6 +12,9 @@ import (
 // Music Genome Project.
 // Calls API method "track.explainTrack".
 func (c *Client) ExplainTrack(trackToken string) (*responses.ExplainTrack, error) {
+	if err := c.validateUserAuthToken("explaining track"); err != nil {
+		return nil, err
+	}
 	requestData := requests.ExplainTrack{
 		TrackToken:    trackToken,
 		UserAuthToken: c.userAuthToken,
@@ -34,6 +37,9 @@ func (c *Client) ExplainTrack(trackToken string) (*responses.ExplainTrack, error
 // MusicSearch searches for music, which can be used to create a new or add seeds to a station.
 // Calls API method "music.search".
 func (c *Client) MusicSearch(searchText string) (*responses.MusicSearch, error) {
+	if err := c.validateUserAuthToken("searching music"); err != nil {
+		return nil, err
+	}
 	requestData := requests.MusicSearch{
 		SearchText:    searchText,
 		UserAuthToken: c.userAuthToken,
@@ -57,6 +63,9 @@ func (c *Client) MusicSearch(searchText string) (*responses.MusicSearch, error) 
 // Argument trackToken is a token of a specific artist.
 // Calls API method "bookmark.addArtistBookmark".
 func (c *Client) BookmarkAddArtistBookmark(trackToken string) (*responses.BookmarkAddArtistBookmark, error) {
+	if err := c.validateUserAuthToken("bookmarking artist"); err != nil {
+		return nil, err
+	}
 	requestData := requests.BookmarkAddArtistBookmark{
 		TrackToken:    trackToken,
 		UserAuthToken: c.userAuthToken,
@@ -80,6 +89,9 @@ func (c *Client) BookmarkAddArtistBookmark(trackToken string) (*responses.Bookma
 // Argument trackToken is a token of a specific song.
 // Calls API method "bookmark.addSongBookmark".
 func (c *Client) BookmarkAddSongBookmark(trackToken string) (*responses.BookmarkAddSongBookmark, error) {
+	if err := c.validateUserAuthToken("bookmarking song"); err != nil {
+		return nil, err
+	}
 	requestData := requests.BookmarkAddSongBookmark{
 		TrackToken:    trackToken,
 		UserAuthToken: c.userAuthToken,

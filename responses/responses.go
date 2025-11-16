@@ -9,6 +9,11 @@ import (
 )
 
 // ErrorCodeMap maps Pandora API error codes to their string names.
+//
+// Error code 0 (INTERNAL) is a generic error that often indicates authentication issues,
+// invalid parameters, or rate limiting. Error codes in the 1000+ range are more specific
+// and actionable. When receiving error code 0, check authentication flow and parameter
+// validation first.
 var ErrorCodeMap = map[int]string{ //nolint:gochecknoglobals // part of public API
 	0:    "INTERNAL",
 	1:    "MAINTENCANCE_MODE",
@@ -67,9 +72,25 @@ func (e PandoraError) Error() string {
 	return fmt.Sprintf("Pandora Error: %d %s", e.Code, e.Message)
 }
 
+// GetErrorGuidance returns troubleshooting tips for common error codes.
+// This function provides contextual help to diagnose the root cause of API errors,
+// especially for generic error code 0 (INTERNAL).
+func GetErrorGuidance(code int) string {
+	switch code {
+	case 0:
+		return "Troubleshooting: Check that authentication prerequisites are met " +
+			"(partner login completed), verify all required parameters are valid, " +
+			"ensure calling from a US IP address, consider rate limiting if making " +
+			"frequent requests, note that this is an unofficial API that may have " +
+			"restrictions"
+	default:
+		return ""
+	}
+}
+
 // DateResponse is used repeatedly in places where Pandora returns a JSON object
 // called dateCreated.
-// Most of the data is rubish without a little processing but you can use GetDate()
+// Most of the data is rubbish without a little processing but you can use GetDate()
 // and also Time is just a nice UNIX epoch.
 type DateResponse struct {
 	Nanos          int `json:"nano"`
