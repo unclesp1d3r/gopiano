@@ -121,6 +121,7 @@ When adding a new Pandora API method:
 
    ```go
    // MethodName represents the request data for api.methodName.
+   // Note: Add this struct to github.com/unclesp1d3r/gopiano/requests/requests.go
    type MethodName struct {
        FieldName string `json:"fieldName"` // Match Pandora API exactly
        SyncTime  int    `json:"syncTime"`  // Required for authenticated calls
@@ -131,6 +132,7 @@ When adding a new Pandora API method:
 
    ```go
    // MethodName represents the response from api.methodName.
+   // Note: Add this struct to github.com/unclesp1d3r/gopiano/responses/responses.go
    type MethodName struct {
        Stat string `json:"stat"` // "ok" or "fail"
        // ... other fields matching Pandora API exactly
@@ -203,6 +205,7 @@ When adding a new Pandora API method:
 - **Prefer explicit structs**: Avoid `interface{}` unless type assertions are intentional
 - **Constants**: Define constants for protocol-level values (reject magic numbers)
 - **No GOPATH**: Keep GOPATH usage minimal; use modules
+- **Module path**: When adding or editing API structs, use the module path `github.com/unclesp1d3r/gopiano` - request structs go in `github.com/unclesp1d3r/gopiano/requests/requests.go` and response structs go in `github.com/unclesp1d3r/gopiano/responses/responses.go` (see [Project Context](#project-context) for module details)
 
 ### Context
 
