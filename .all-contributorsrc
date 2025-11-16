@@ -39,6 +39,18 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "unclesp1d3r",
+      "name": "UncleSp1d3r",
+      "avatar_url": "https://avatars.githubusercontent.com/u/251112?v=4",
+      "profile": "https://unclesp1d3r.github.io/",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "doc",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
