@@ -65,6 +65,7 @@ Help improve test coverage:
 - Go 1.24 or later
 - Git
 - Basic familiarity with Go and the project structure
+- [just](https://github.com/casey/just) (optional, but recommended for running common tasks)
 
 ### Setup
 
@@ -92,6 +93,11 @@ Help improve test coverage:
 5. **Verify setup**:
 
    ```sh
+   # Using justfile (recommended)
+   just test
+   just lint
+
+   # Or using Go commands directly
    go test ./...
    golangci-lint run ./...
    ```
@@ -104,6 +110,33 @@ Help improve test coverage:
 - **Tests**: `*_test.go` files alongside source files
 
 For more architectural details, see [AGENTS.md](AGENTS.md).
+
+### Using the Justfile
+
+This project includes a `justfile` with convenient recipes for common development tasks. If you have [just](https://github.com/casey/just) installed, you can use these commands:
+
+**Build and Test:**
+
+- `just build` - Build the project
+- `just test` - Run all tests
+- `just test-race` - Run tests with race detector
+- `just test-run TEST` - Run specific test by name pattern
+- `just test-integration` - Run integration tests
+- `just test-coverage` - Run tests with coverage
+- `just test-coverage-html` - Generate and view HTML coverage report
+
+**Linting:**
+
+- `just lint` - Run golangci-lint
+- `just lint-fix` - Run linter with autofix
+
+**CI and Dependencies:**
+
+- `just ci-check` - Run all checks and tests (for CI)
+- `just update-deps` - Update dependencies
+- `just tidy` - Tidy module dependencies
+
+You can also run `just` without arguments to see all available recipes. All justfile recipes are optional - you can use the underlying Go commands directly if you prefer.
 
 ## Development Workflow
 
@@ -135,25 +168,40 @@ Use descriptive branch names:
 Run tests:
 
 ```sh
-# Run all tests
+# Using justfile (recommended)
+just test                    # Run all tests
+just test-run TestName       # Run specific test by name pattern
+just test-integration        # Run integration tests (requires Pandora credentials)
+just test-race               # Run tests with race detector
+just test-coverage           # Run tests with coverage
+just test-coverage-html      # Generate and view HTML coverage report
+
+# Or using Go commands directly
 go test ./...
-
-# Run specific test
 go test -run TestName ./path
-
-# Run integration tests (requires Pandora credentials)
 go test -tags=integration ./...
+go test -race -v ./...
 ```
 
 Run the linter:
 
 ```sh
+# Using justfile (recommended)
+just lint        # Run linter
+just lint-fix    # Run linter with autofix
+
+# Or using golangci-lint directly
 golangci-lint run ./...
+golangci-lint run --fix ./...
 ```
 
 Verify compilation:
 
 ```sh
+# Using justfile (recommended)
+just build
+
+# Or using Go commands directly
 go build ./...
 ```
 
@@ -254,6 +302,10 @@ func Test_IntegrationExample(t *testing.T) {
 Run with:
 
 ```sh
+# Using justfile (recommended)
+just test-integration
+
+# Or using Go commands directly
 go test -tags=integration ./...
 ```
 
@@ -272,11 +324,13 @@ While the project currently has minimal test coverage, we aim to improve it. Whe
 ### Before Submitting
 
 - [ ] Code follows project conventions
-- [ ] Tests pass (`go test ./...`)
-- [ ] Linter passes (`golangci-lint run ./...`)
-- [ ] Code compiles (`go build ./...`)
+- [ ] Tests pass (`just test` or `go test ./...`)
+- [ ] Linter passes (`just lint` or `golangci-lint run ./...`)
+- [ ] Code compiles (`just build` or `go build ./...`)
 - [ ] Documentation is updated (if needed)
 - [ ] Commit messages are clear
+
+You can run `just ci-check` to run both linting and tests in one command.
 
 ### Review Process
 

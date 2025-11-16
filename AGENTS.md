@@ -101,14 +101,14 @@ Structs are named after their corresponding API methods:
 ## Development Workflow
 
 1. **Before Making Changes**:
-   - Run `golangci-lint run ./...` (config in `.golangci.yml`) - enforces formatting and linting
-   - Run `go test ./...` to verify existing tests pass
-   - Use `go test -run TestName ./path` to target specific tests
+   - Run `just lint` or `golangci-lint run ./...` (config in `.golangci.yml`) - enforces formatting and linting
+   - Run `just test` or `go test ./...` to verify existing tests pass
+   - Use `just test-run TestName` or `go test -run TestName ./path` to target specific tests
 
 2. **After Making Changes**:
-   - Run `golangci-lint run ./...` to ensure code quality
-   - Run `go build ./...` to verify compilation
-   - Run `go test ./...` to verify tests pass
+   - Run `just lint` or `golangci-lint run ./...` to ensure code quality
+   - Run `just build` or `go build ./...` to verify compilation
+   - Run `just test` or `go test ./...` to verify tests pass
    - Update README.md if adding new commands or client capabilities
 
 ## Code Patterns
@@ -236,7 +236,7 @@ When adding a new Pandora API method:
 - **Parallel**: Use `t.Parallel()` when safe
 - **Coverage**: This repo currently lacks proper tests; prioritize coverage when adding features
 - **Test files**: `*_test.go` alongside source files
-- **Integration Tests**: Integration tests use the build tag `//go:build integration` as seen in `gopiano_test.go`. These tests require valid Pandora credentials and make actual API calls. Run with `go test -tags=integration ./...`
+- **Integration Tests**: Integration tests use the build tag `//go:build integration` as seen in `gopiano_test.go`. These tests require valid Pandora credentials and make actual API calls. Run with `just test-integration` or `go test -tags=integration ./...`
 
 ## Common Operations
 
@@ -295,30 +295,56 @@ The project uses `golangci-lint` for code quality enforcement:
 
 ## Build and Test Commands
 
-Use these commands from the module root.
+Use these commands from the module root. The project includes a `justfile` with convenient recipes - use `just <recipe>` or the underlying Go commands directly.
 
 ```bash
 # Build
+just build
+# or
 go build ./...
 
 # Run all tests
+just test
+# or
 go test ./...
 
 # Run all tests with race detector and verbose output
+just test-race
+# or
 go test -race -v ./...
 
 # Run specific test by name pattern (unit or integration)
+just test-run TestName
+# or
 go test -run '^TestName$' ./...
 
 # Run all integration tests (requires Pandora credentials and hits live endpoints)
+just test-integration
+# or
 go test -tags=integration ./...
 
 # Run a specific integration test
+just test-integration-run Test_AuthPartnerLogin_1
+# or
 go test -tags=integration -run '^Test_AuthPartnerLogin_1$' ./...
 
 # Lint and format check
+just lint
+# or
 golangci-lint run ./...
 
 # Lint with autofix (formatting/imports and simple fixes)
+just lint-fix
+# or
 golangci-lint run --fix ./...
+
+# Run all checks and tests (CI)
+just ci-check
+
+# Test coverage
+just test-coverage           # Generate coverage report
+just test-coverage-html      # View HTML coverage report
+just test-coverage-func      # Show function-level coverage
 ```
+
+See the `justfile` for all available recipes. Run `just` without arguments to see the full list.
