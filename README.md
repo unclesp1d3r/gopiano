@@ -53,37 +53,37 @@ Only after both steps can you call other API methods that require user authentic
 package main
 
 import (
- "log"
+	"log"
 
- "github.com/unclesp1d3r/gopiano"
+	"github.com/unclesp1d3r/gopiano"
 )
 
 func main() {
- // Create a client
- client, err := gopiano.NewClient(gopiano.AndroidClient)
- if err != nil {
-  log.Fatal(err)
- }
+	// Create a client
+	client, err := gopiano.NewClient(gopiano.AndroidClient)
+	if err != nil {
+		log.Fatal(err)
+	}
 
- // Step 1: Partner login (REQUIRED FIRST)
- _, err = client.AuthPartnerLogin()
- if err != nil {
-  log.Fatal(err)
- }
+	// Step 1: Partner login (REQUIRED FIRST)
+	_, err = client.AuthPartnerLogin()
+	if err != nil {
+		log.Fatal(err)
+	}
 
- // Step 2: User login (for existing users)
- _, err = client.AuthUserLogin("user@example.com", "password")
- if err != nil {
-  log.Fatal(err)
- }
+	// Step 2: User login (for existing users)
+	_, err = client.AuthUserLogin("user@example.com", "password")
+	if err != nil {
+		log.Fatal(err)
+	}
 
- // Now you can call other methods
- stations, err := client.UserGetStationList(false)
- if err != nil {
-  log.Fatal(err)
- }
+	// Now you can call other methods
+	stations, err := client.UserGetStationList(false)
+	if err != nil {
+		log.Fatal(err)
+	}
 
- log.Printf("User has %d stations", len(stations.Result.Stations))
+	log.Printf("User has %d stations", len(stations.Result.Stations))
 }
 ```
 
@@ -111,34 +111,34 @@ import (
 )
 
 func main() {
- client, err := gopiano.NewClient(gopiano.AndroidClient)
- if err != nil {
-  log.Fatal(err)
- }
+	client, err := gopiano.NewClient(gopiano.AndroidClient)
+	if err != nil {
+		log.Fatal(err)
+	}
 
- // Step 1: Partner login (REQUIRED)
- _, err = client.AuthPartnerLogin()
- if err != nil {
-  log.Fatalf("Partner login failed: %v", err)
- }
+	// Step 1: Partner login (REQUIRED)
+	_, err = client.AuthPartnerLogin()
+	if err != nil {
+		log.Fatalf("Partner login failed: %v", err)
+	}
 
- // Step 2: Create new user
- userResp, err := client.UserCreateUser(
-  "user@example.com",  // username: must be valid email
-  "SecurePassword123",  // password
-  "male",               // gender: must be "male" or "female"
-  "US",                 // countryCode: must be "US"
-  90210,                // zipCode: must be valid US ZIP
-  1990,                 // birthYear: must meet age requirements
-  false,                // emailOptin: marketing email preference
- )
- if err != nil {
-  log.Fatalf("User creation failed: %v", err)
- }
+	// Step 2: Create new user
+	userResp, err := client.UserCreateUser(
+		"user@example.com",  // username: must be valid email
+		"SecurePassword123",  // password
+		"male",               // gender: must be "male" or "female"
+		"US",                 // countryCode: must be "US"
+		90210,                // zipCode: must be valid US ZIP
+		1990,                 // birthYear: must meet age requirements
+		false,                // emailOptin: marketing email preference
+	)
+	if err != nil {
+		log.Fatalf("User creation failed: %v", err)
+	}
 
- log.Printf("User created: %s (ID: %s)",
-  userResp.Result.Username,
-  userResp.Result.UserID)
+	log.Printf("User created: %s (ID: %s)",
+		userResp.Result.Username,
+		userResp.Result.UserID)
 }
 ```
 
