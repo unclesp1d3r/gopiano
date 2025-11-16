@@ -101,11 +101,13 @@ Structs are named after their corresponding API methods:
 ## Development Workflow
 
 1. **Before Making Changes**:
+
    - Run `just lint` or `golangci-lint run ./...` (config in `.golangci.yml`) - enforces formatting and linting
    - Run `just test` or `go test ./...` to verify existing tests pass
    - Use `just test-run TestName` or `go test -run TestName ./path` to target specific tests
 
 2. **After Making Changes**:
+
    - Run `just lint` or `golangci-lint run ./...` to ensure code quality
    - Run `just build` or `go build ./...` to verify compilation
    - Run `just test` or `go test ./...` to verify tests pass

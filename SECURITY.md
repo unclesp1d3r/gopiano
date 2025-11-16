@@ -4,10 +4,10 @@
 
 The following versions of gopiano currently receive security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
+| Version        | Supported          |
+| -------------- | ------------------ |
 | Latest release | :white_check_mark: |
-| main branch | :white_check_mark: |
+| main branch    | :white_check_mark: |
 | Older releases | :x:                |
 
 ## Reporting a Vulnerability
