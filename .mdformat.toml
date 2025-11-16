@@ -1,0 +1,12 @@
+exclude = [
+    "**/node_modules/**",
+    "**/__pycache__/**",
+    "**/*.tpl.md",
+    "CONTRIBUTORS.md",
+]
+validate = true
+number = true
+
+[plugin.mkdocs]
+align_semantic_breaks_in_lists = true
+ignore_missing_references = true

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cellofellow/gopiano/requests"
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/requests"
+	"github.com/unclesp1d3r/gopiano/responses"
 )
 
 // AuthPartnerLogin establishes a Partner session with provided

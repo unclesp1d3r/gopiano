@@ -1,26 +1,63 @@
 # Pandora.com API Wrapper Client
 
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/unclesp1d3r/gopiano)](https://goreportcard.com/report/github.com/unclesp1d3r/gopiano)
+[![GoDoc](https://pkg.go.dev/badge/github.com/unclesp1d3r/gopiano.svg)](https://pkg.go.dev/github.com/unclesp1d3r/gopiano)
+[![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
+
 A very thin wrapper around Pandora.com's JSON API.
 
 ## Usage and Hacking
 
-First create or set a `$GOPATH`, then use `go get`.
+### Using as a Dependency
+
+Add gopiano to your Go module:
 
 ```sh
-go get github.com/cellofellow/gopiano
+go get github.com/unclesp1d3r/gopiano
 ```
 
-You can then import this into your own code with
+Then import it in your code:
 
 ```go
-import "github.com/cellofellow/gopiano"
+import "github.com/unclesp1d3r/gopiano"
 ```
 
-Or if you like you hack on it `cd $GOPATH/src/github.com/cellofellow/gopiano`.
-I'm very much in need of someone with Go experience to vet my code, and some
-specific things still need doing:
+### Development
 
-* Proper tests.
-* Proper error handling.
+To contribute or hack on gopiano, clone the repository:
 
-This is *alpha quality code*, use at your own risk.
+```sh
+git clone https://github.com/unclesp1d3r/gopiano.git
+cd gopiano
+```
+
+The project uses Go modules, so you can work on it from any directory. See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## Project Status
+
+This is *alpha quality code* - use at your own risk. The project is actively being improved with ongoing work on:
+
+- Proper tests
+- Proper error handling
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help improve the project.
+
+## Documentation & Community
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to this project
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Our community standards
+- **[SECURITY.md](SECURITY.md)** - Security policy and vulnerability reporting
+- **[GOVERNANCE.md](GOVERNANCE.md)** - Project governance and decision-making
+- **[CONTRIBUTORS.md](CONTRIBUTORS.md)** - Recognition of our contributors
+- **[AGENTS.md](AGENTS.md)** - AI agent instructions for project context
+
+### Security
+
+**Please report security vulnerabilities privately** per our [Security Policy](SECURITY.md). Do not report security issues via public GitHub issues.

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/cellofellow/gopiano/requests"
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/requests"
+	"github.com/unclesp1d3r/gopiano/responses"
 )
 
 // StationAddFeedback adds feedback (thumbs up or down, or star or ban if you prefer) to a song.
@@ -206,7 +206,10 @@ func (c *Client) StationGetPlaylist(stationToken string) (*responses.StationGetP
 // Argument stationToken is obtained from Client.UserGetStationList
 // Argument includeExtendedAttributes will include music seed and feedback IDs in response.
 // Calls API method "station.getStation".
-func (c *Client) StationGetStation(stationToken string, includeExtendedAttributes bool) (*responses.StationGetStation, error) {
+func (c *Client) StationGetStation(
+	stationToken string,
+	includeExtendedAttributes bool,
+) (*responses.StationGetStation, error) {
 	requestData := requests.StationGetStation{
 		StationToken:              stationToken,
 		IncludeExtendedAttributes: includeExtendedAttributes,

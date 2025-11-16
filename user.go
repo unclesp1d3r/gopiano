@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/cellofellow/gopiano/requests"
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/requests"
+	"github.com/unclesp1d3r/gopiano/responses"
 )
 
 // UserCanSubscribe returns whether a user is subscribed or can subscribe
@@ -34,7 +34,11 @@ func (c *Client) UserCanSubscribe() (*responses.UserCanSubscribe, error) {
 // Argument username must be in the form of an email address. gender must be either "male" or "female".
 // countryCode must be "US".
 // Calls API method "user.createUser".
-func (c *Client) UserCreateUser(username, password, gender, countryCode string, zipCode, birthYear int, emailOptin bool) (*responses.UserCreateUser, error) {
+func (c *Client) UserCreateUser(
+	username, password, gender, countryCode string,
+	zipCode, birthYear int,
+	emailOptin bool,
+) (*responses.UserCreateUser, error) {
 	requestData := requests.UserCreateUser{
 		PartnerAuthToken: c.partnerAuthToken,
 		AccountType:      "registered",

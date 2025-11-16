@@ -1,0 +1,58 @@
+{
+  "projectName": "gopiano",
+  "projectOwner": "unclesp1d3r",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "CONTRIBUTORS.md",
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "cellofellow",
+      "name": "Joshua Gardner",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2760790?v=4",
+      "profile": "http://www.jgardner.tech/",
+      "contributions": [
+        "code",
+        "userTesting",
+        "projectManagement"
+      ]
+    },
+    {
+      "login": "stayradiated",
+      "name": "George Czabania",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1140167?v=4",
+      "profile": "https://george.czabania.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "scotow",
+      "name": "Lopez Benjamin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7684550?v=4",
+      "profile": "https://scotow.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "unclesp1d3r",
+      "name": "UncleSp1d3r",
+      "avatar_url": "https://avatars.githubusercontent.com/u/251112?v=4",
+      "profile": "https://unclesp1d3r.github.io/",
+      "contributions": [
+        "code",
+        "projectManagement",
+        "doc",
+        "maintenance"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": false
+}

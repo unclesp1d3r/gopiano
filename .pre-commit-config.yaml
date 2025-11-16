@@ -1,0 +1,67 @@
+# .pre-commit-config.yaml
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-xml
+      - id: mixed-line-ending
+        args: [--fix=auto]
+      - id: check-docstring-first
+      - id: check-vcs-permalinks
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.8
+    hooks:
+      - id: actionlint
+        files: ".github/workflows/"
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+
+  # Commit message linting via commitlint
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.23.0
+    hooks:
+      - id: commitlint
+        name: commitlint
+        entry: npx commitlint --edit
+        language: node
+        stages: [commit-msg]
+
+  - repo: https://github.com/hukkin/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-admon
+          - mdformat-config
+          - mdformat-footnote
+          - mdformat-frontmatter
+          - mdformat-simple-breaks
+          - mdformat-tables
+          - mdformat-web
+          - mdformat-wikilink
+          - mdformat-ruff
+          - mdformat-gfm-alerts
+          - mdformat-toc
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.4
+    hooks:
+      - id: go-build-mod
+      - id: go-mod-tidy-repo
+      - id: go-test-mod
+      - id: golangci-lint-mod

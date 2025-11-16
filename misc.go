@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/cellofellow/gopiano/requests"
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/requests"
+	"github.com/unclesp1d3r/gopiano/responses"
 )
 
 // ExplainTrack retrieves an incomplete list of attributes assigned to a specified song by the
