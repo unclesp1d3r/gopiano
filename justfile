@@ -73,7 +73,7 @@ pre-commit:
     pre-commit run --all-files
 
 # Run all checks and tests (CI)
-ci-check: pre-commit lint test
+ci-check: pre-commit lint test test-integration
 
 # Update dependencies
 update-deps:
