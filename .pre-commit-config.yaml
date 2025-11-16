@@ -20,7 +20,7 @@ repos:
       - id: check-vcs-permalinks
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+    rev: v1.7.8
     hooks:
       - id: actionlint
         files: ".github/workflows/"
@@ -32,11 +32,11 @@ repos:
 
   # Commit message linting via commitlint
   - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.22.0
+    rev: v9.23.0
     hooks:
       - id: commitlint
         name: commitlint
-        entry: npx --no-install commitlint --edit
+        entry: npx commitlint --edit
         language: node
         stages: [commit-msg]
 
@@ -56,7 +56,6 @@ repos:
           - mdformat-wikilink
           - mdformat-ruff
           - mdformat-gfm-alerts
-          - mdformat-rustfmt
           - mdformat-toc
 
   - repo: https://github.com/tekwizely/pre-commit-golang
