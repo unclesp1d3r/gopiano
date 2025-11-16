@@ -58,3 +58,11 @@ repos:
           - mdformat-gfm-alerts
           - mdformat-rustfmt
           - mdformat-toc
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.4
+    hooks:
+      - id: go-build-mod
+      - id: go-mod-tidy-repo
+      - id: go-test-mod
+      - id: golangci-lint-mod
