@@ -21,6 +21,15 @@
         "userTesting",
         "projectManagement"
       ]
+    },
+    {
+      "login": "stayradiated",
+      "name": "George Czabania",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1140167?v=4",
+      "profile": "https://george.czabania.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
