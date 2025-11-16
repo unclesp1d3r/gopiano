@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/responses"
 	"golang.org/x/crypto/blowfish" //nolint:staticcheck // required by Pandora API
 )
 

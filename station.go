@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/cellofellow/gopiano/requests"
-	"github.com/cellofellow/gopiano/responses"
+	"github.com/unclesp1d3r/gopiano/requests"
+	"github.com/unclesp1d3r/gopiano/responses"
 )
 
 // StationAddFeedback adds feedback (thumbs up or down, or star or ban if you prefer) to a song.
