@@ -3,6 +3,12 @@
 // This example shows the basic authentication flow for existing users.
 // This is the minimal authentication flow that must be completed before
 // calling any user-specific API methods.
+//
+// ⚠️ Disclaimer: This example is for educational and demonstration purposes only.
+// Users must have valid Pandora account credentials and are responsible for
+// ensuring they have legal rights to access the Pandora API and comply with
+// Pandora's Terms of Service. The placeholder credentials in this example must
+// be replaced with actual valid credentials.
 package main
 
 import (
@@ -40,6 +46,10 @@ func main() {
 	// This requires valid Pandora account credentials (email and password).
 	// After this call succeeds, the client will have userAuthToken and userID set,
 	// allowing you to make authenticated user API calls.
+	//
+	// ⚠️ IMPORTANT: Replace these placeholder credentials with your actual valid
+	// Pandora account credentials. You must have legal rights to use these credentials
+	// and must comply with Pandora's Terms of Service.
 	username := "user@example.com"
 	password := "your-password"
 

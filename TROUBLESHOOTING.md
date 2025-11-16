@@ -2,13 +2,30 @@
 
 This guide covers common issues and their solutions when using the gopiano library.
 
+## ⚠️ Disclaimer
+
+**Reference Implementation**: gopiano is a reference implementation for educational and research purposes, demonstrating interaction with Pandora's unofficial, reverse-engineered API.
+
+**Valid Credentials Required**: All troubleshooting guidance in this document assumes users have valid Pandora account credentials and legal access rights to the Pandora API.
+
+**Legal Compliance**: Users are responsible for ensuring they comply with Pandora's Terms of Service when using this library. This library is not affiliated with, endorsed by, or connected to Pandora Media, LLC or its affiliates.
+
+**Unofficial API**: Troubleshooting an unofficial, reverse-engineered API has inherent limitations. The API may be deprecated, restricted, or unavailable at any time, and solutions that work today may not work in the future.
+
 ## Table of Contents
 
+- [Disclaimer](#-disclaimer)
+
 - [Pandora Error: 0 INTERNAL](#pandora-error-0-internal)
+
 - [Authentication Issues](#authentication-issues)
+
 - [Parameter Validation Errors](#parameter-validation-errors)
+
 - [Geographic Restrictions](#geographic-restrictions)
+
 - [Rate Limiting](#rate-limiting)
+
 - [API Deprecation Concerns](#api-deprecation-concerns)
 
 ## Pandora Error: 0 INTERNAL
@@ -168,6 +185,8 @@ All API interactions require a two-step authentication process:
    - Establishes user session
    - Obtains `userAuthToken` and `userID`
    - Required before user-specific methods
+
+   **Note**: You must have valid Pandora account credentials and legal rights to authenticate. Ensure you comply with Pandora's Terms of Service when using authentication methods.
 
 ### How to Verify Authentication State
 

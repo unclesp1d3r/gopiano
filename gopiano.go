@@ -53,6 +53,10 @@ Only after both steps can you call other API methods that require user authentic
 - Potential for rate limiting on frequent requests
 - Error code 0 (INTERNAL) typically indicates authentication or validation issues
 - Official Pandora API now uses OAuth2 + GraphQL
+
+# Disclaimer
+
+This is a reference implementation for educational and research purposes. Users must have valid Pandora account credentials and are responsible for ensuring they have legal rights to access the Pandora API and comply with Pandora's Terms of Service. This software is provided "as-is" without warranty.
 */
 package gopiano
 

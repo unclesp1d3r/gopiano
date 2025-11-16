@@ -2,6 +2,13 @@
 //
 // This example shows how to create a new Pandora user account using UserCreateUser.
 // Prerequisites: US IP address, valid parameters, and the legacy API must still support account creation.
+//
+// ⚠️ Disclaimer: This example is for educational and demonstration purposes only.
+// Creating Pandora accounts programmatically may violate Pandora's Terms of Service.
+// Users are responsible for ensuring they have legal rights to create accounts via
+// the API and must comply with all applicable terms and policies. This example is
+// primarily intended for understanding the API structure, not for automated account
+// creation. The placeholder credentials in this example must be replaced with valid data.
 package main
 
 import (
@@ -38,6 +45,12 @@ func main() {
 	// - zipCode: Must be a valid US ZIP code (5 digits)
 	// - birthYear: Must meet minimum age requirements (typically 13+)
 	// - emailOptin: Whether user opts in to marketing emails
+	//
+	// ⚠️ IMPORTANT: Replace these placeholder values with valid data. Creating accounts
+	// programmatically may violate Pandora's Terms of Service. You must verify that you
+	// have the legal right to create accounts via the API and comply with all applicable
+	// terms and policies. This example is for educational purposes to understand the API
+	// structure, not for automated account creation.
 	username := "user@example.com"
 	password := "SecurePassword123"
 	gender := "male"
