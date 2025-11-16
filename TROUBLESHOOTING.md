@@ -2,7 +2,7 @@
 
 This guide covers common issues and their solutions when using the gopiano library.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **Reference Implementation**: gopiano is a reference implementation for educational and research purposes, demonstrating interaction with Pandora's unofficial, reverse-engineered API.
 
@@ -14,7 +14,7 @@ This guide covers common issues and their solutions when using the gopiano libra
 
 ## Table of Contents
 
-- [Disclaimer](#-disclaimer)
+- [Disclaimer](#disclaimer)
 
 - [Pandora Error: 0 INTERNAL](#pandora-error-0-internal)
 
