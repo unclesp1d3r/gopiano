@@ -1,14 +1,28 @@
 # AGENTS
 
-Guidelines for AI coding assistants working on gopiano, a thin wrapper around Pandora.com's JSON API.
+Guidelines for AI coding assistants working on gopiano, a thin wrapper around Pandora.com's JSON API. This file is the single source of truth for assistant behavior in this repository.
+
+## Project Overview
+
+gopiano is a thin wrapper library around Pandora.com's reverse-engineered JSON API. The library provides a Go client for interacting with Pandora's API endpoints. The Pandora API documentation is available at <https://6xq.net/pandora-apidoc/json/> and <https://6xq.net/pandora-apidoc/rest/>.
 
 ## Project Context
 
 - **Purpose**: Thin wrapper library around Pandora.com's reverse-engineered JSON API
 - **API Documentation**: <https://6xq.net/pandora-apidoc/json/> and <https://6xq.net/pandora-apidoc/rest/>
-- **Module Path**: `github.com/cellofellow/gopiano`
+- **Module Path**: `github.com/unclesp1d3r/gopiano`
 - **Go Version**: 1.24+ (read-only module download mode)
 - **Status**: Alpha quality; needs proper tests and error handling improvements
+
+## Architecture
+
+The project follows a three-layer architecture:
+
+1. **Main Package** (`gopiano`): Contains the `Client` struct and all client methods organized by domain (`auth.go`, `station.go`, `user.go`, `misc.go`)
+2. **Requests Package** (`requests`): Contains structs for JSON marshaling that mirror Pandora API request formats exactly
+3. **Responses Package** (`responses`): Contains structs for JSON unmarshaling that mirror Pandora API response formats exactly
+
+This structure ensures that the library remains a thin wrapper, not an abstraction, maintaining fidelity to the Pandora API.
 
 ## Codebase Structure
 
@@ -17,6 +31,72 @@ Guidelines for AI coding assistants working on gopiano, a thin wrapper around Pa
 - **Response Types**: `responses/responses.go` - Structs for JSON unmarshaling (mirror Pandora API exactly)
 - **Feature Files**: `auth.go`, `station.go`, `user.go`, `misc.go` - Client methods organized by domain
 - **Tests**: `*_test.go` files (currently minimal coverage)
+
+## Key Components
+
+### Client Struct
+
+The `Client` struct (defined in `gopiano.go`) is the main entry point for all API interactions. It contains:
+
+- `description`: `ClientDescription` for device emulation
+- `http`: HTTP client for making requests
+- `encrypter`/`decrypter`: Blowfish ciphers for encryption/decryption
+- `timeOffset`: Time offset for sync time calculations
+- `partnerAuthToken`/`partnerID`: Partner authentication credentials
+- `userAuthToken`/`userID`: User authentication credentials
+
+### ClientDescription
+
+The `ClientDescription` struct describes a particular type of client to emulate, including:
+
+- `DeviceModel`: Device model identifier (e.g., "android-generic")
+- `Username`/`Password`: Partner credentials
+- `BaseURL`: Base URL for API endpoints
+- `EncryptKey`/`DecryptKey`: Blowfish encryption keys
+- `Version`: API version
+
+### AndroidClient
+
+The `AndroidClient` global variable provides a pre-configured `ClientDescription` for Android device emulation. This is the standard client configuration used by the library.
+
+### Encryption
+
+The library uses Blowfish ECB (Electronic Codebook) mode encryption for API communication:
+
+- **Encryption**: `encrypt()` method encrypts request data using Blowfish ECB mode
+- **Decryption**: `decrypt()` method decrypts response data using Blowfish ECB mode
+- **Implementation**: Uses `golang.org/x/crypto/blowfish` package (marked as deprecated but required by Pandora API)
+- **Keys**: Encryption/decryption keys are provided by `ClientDescription`
+
+### API Interaction Patterns
+
+The library provides two main methods for API interaction:
+
+- **`PandoraCall()`**: Basic HTTP POST method for unencrypted API calls. Handles URL construction, authentication tokens, and response parsing.
+- **`BlowfishCall()`**: Wrapper around `PandoraCall()` that first encrypts the request body using Blowfish encryption before sending.
+
+Both methods handle:
+
+- URL construction with query parameters (method, partner_id, user_id, auth_token)
+- HTTP request creation with proper headers (User-Agent: "gopiano", Content-Type: "text/plain")
+- Response parsing and error handling
+- Pandora API error detection and conversion to `PandoraError` types
+
+### Error Handling
+
+The library uses a custom error type for Pandora API errors:
+
+- **`PandoraError`**: Defined in `responses/responses.go`, implements the `error` interface
+- **`ErrorCodeMap`**: Maps Pandora API error codes to human-readable error messages
+- **Error Detection**: `PandoraCall()` checks for `"stat": "fail"` in responses and converts them to `PandoraError` types
+
+### Naming Conventions
+
+Structs are named after their corresponding API methods:
+
+- Request structs: Match API method names (e.g., `AuthPartnerLogin`, `UserGetStationList`)
+- Response structs: Match API method names (e.g., `AuthPartnerLogin`, `UserGetStationList`)
+- Client methods: Match API method names with appropriate prefixes (e.g., `AuthPartnerLogin()`, `UserGetStationList()`)
 
 ## Development Workflow
 
@@ -153,6 +233,7 @@ When adding a new Pandora API method:
 - **Parallel**: Use `t.Parallel()` when safe
 - **Coverage**: This repo currently lacks proper tests; prioritize coverage when adding features
 - **Test files**: `*_test.go` alongside source files
+- **Integration Tests**: Integration tests use the build tag `//go:build integration` as seen in `gopiano_test.go`. These tests require valid Pandora credentials and make actual API calls. Run with `go test -tags=integration ./...`
 
 ## Common Operations
 
@@ -187,18 +268,54 @@ When adding a new Pandora API method:
 - **Consistent exports**: Keep `misc.go`, `station.go`, `user.go` consistent with exported behavior
 - **Doc comments**: Add doc comments for all public functions
 
+## Dependencies
+
+- **golang.org/x/crypto/blowfish**: Required for Blowfish encryption. This package is marked as deprecated but is required by the Pandora API. Use `//nolint:staticcheck` when importing.
+
+## Code Quality
+
+The project uses `golangci-lint` for code quality enforcement:
+
+- **Configuration**: `.golangci.yml` defines linting rules and settings
+- **Nolint Directives**: Use nolint directives sparingly with clear justification comments
+- **Common Nolints**:
+  - `//nolint:staticcheck` for required but deprecated packages
+  - `//nolint:tagliatelle` for JSON tag names that match API typos
+  - `//nolint:gochecknoglobals` for intentionally exported global variables
+
+## Documentation Standards
+
+- **Package Documentation**: All packages should have package-level documentation
+- **Exported Symbols**: All exported types, functions, and methods must have godoc comments
+- **Go Conventions**: Follow standard Go documentation conventions
+- **Examples**: Include usage examples in doc comments when helpful
+
 ## Build and Test Commands
 
+Use these commands from the module root.
+
 ```bash
+# Build
+go build ./...
+
 # Run all tests
 go test ./...
 
-# Run specific test
-go test -run TestName ./path
+# Run all tests with race detector and verbose output
+go test -race -v ./...
+
+# Run specific test by name pattern (unit or integration)
+go test -run '^TestName$' ./...
+
+# Run all integration tests (requires Pandora credentials and hits live endpoints)
+go test -tags=integration ./...
+
+# Run a specific integration test
+go test -tags=integration -run '^Test_AuthPartnerLogin_1$' ./...
 
 # Lint and format check
 golangci-lint run ./...
 
-# Build
-go build ./...
+# Lint with autofix (formatting/imports and simple fixes)
+golangci-lint run --fix ./...
 ```
