@@ -78,7 +78,11 @@ func (e PandoraError) Error() string {
 func GetErrorGuidance(code int) string {
 	switch code {
 	case 0:
-		return "Troubleshooting: Check that authentication prerequisites are met (partner login completed), verify all required parameters are valid, ensure calling from a US IP address, consider rate limiting if making frequent requests, note that this is an unofficial API that may have restrictions"
+		return "Troubleshooting: Check that authentication prerequisites are met " +
+			"(partner login completed), verify all required parameters are valid, " +
+			"ensure calling from a US IP address, consider rate limiting if making " +
+			"frequent requests, note that this is an unofficial API that may have " +
+			"restrictions"
 	default:
 		return ""
 	}
