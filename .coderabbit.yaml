@@ -1,0 +1,239 @@
+language: en-US
+tone_instructions: "Thin wrapper around Pandora.com's JSON API. Maintain strict API fidelity - mirror JSON exactly, preserve compatibility, minimal deps. Follow patterns in auth.go, station.go, user.go, misc.go. Preserve JSON tags as-is."
+early_access: true
+enable_free_tier: false
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  high_level_summary_in_walkthrough: true
+  auto_title_placeholder: "@coderabbitai"
+  auto_title_instructions: "Use conventional commit format: <type>(<scope>): <description>. Types: feat, fix, docs, test, refactor, chore, perf. Scopes: auth, station, user, misc, requests, responses, client, encryption, ci, deps. Examples: feat(auth): add UserLogin method, fix(station): correct GetStationList error handling, test(user): add integration tests for GetUserProfile, docs: update API documentation, refactor(client): improve error wrapping in PandoraCall"
+  review_status: true
+  commit_status: true
+  fail_commit_status: false
+  collapse_walkthrough: false
+  changed_files_summary: true
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: true
+  auto_apply_labels: true
+  suggested_reviewers: true
+  auto_assign_reviewers: true
+  poem: true
+  labeling_instructions:
+    - label: "type:feature"
+      instructions: "Use for new functionality and enhancements"
+    - label: "type:bug"
+      instructions: "Use for bug fixes and defect corrections"
+    - label: "priority:critical"
+      instructions: "Use for critical issues and urgent fixes"
+    - label: "priority:high"
+      instructions: "Use for high priority issues and important features"
+    - label: "priority:normal"
+      instructions: "Use for standard work and regular features"
+    - label: "go"
+      instructions: "Use for Go code changes and modifications"
+    - label: "dependencies"
+      instructions: "Use for dependency updates and package changes"
+    - label: "documentation"
+      instructions: "Use for documentation improvements and updates"
+    - label: "testing"
+      instructions: "Use for test-related changes and test infrastructure"
+    - label: "performance"
+      instructions: "Use for performance optimizations and improvements"
+    - label: "ci"
+      instructions: "Use for CI/CD and GitHub Actions changes"
+    - label: "breaking_change"
+      instructions: "Use for incompatible changes and major updates"
+    - label: "audit"
+      instructions: "Use for audit compliance and report generation work"
+  path_filters: []
+  path_instructions:
+    - path: "gopiano.go"
+      instructions: "Core client file. Contains Client struct, encryption/decryption methods, PandoraCall, and BlowfishCall. Review for proper error handling, encryption correctness, and HTTP client usage. Ensure timeOffset calculations are correct."
+    - path: "auth.go"
+      instructions: "Authentication methods. Follow pattern: create request struct, marshal JSON, call PandoraCall/BlowfishCall, handle response. Must set partnerAuthToken/partnerID or userAuthToken/userID on client. Include SyncTime for authenticated calls."
+    - path: "station.go"
+      instructions: "Station-related API methods. Follow same pattern as auth.go. Use BlowfishCall for encrypted requests. Include SyncTime: c.GetSyncTime() for authenticated calls. Methods should match Pandora API method names."
+    - path: "user.go"
+      instructions: "User-related API methods. Follow same pattern as auth.go. Use BlowfishCall for encrypted requests. Include SyncTime: c.GetSyncTime() for authenticated calls. Methods should match Pandora API method names."
+    - path: "misc.go"
+      instructions: "Miscellaneous API methods. Follow same pattern as auth.go. Use BlowfishCall for encrypted requests. Include SyncTime: c.GetSyncTime() for authenticated calls. Methods should match Pandora API method names."
+    - path: "requests/*.go"
+      instructions: "Request structs for JSON marshaling. Must mirror Pandora API exactly - field names, types, and JSON tags must match API documentation. Preserve typos in JSON tags (use //nolint:tagliatelle). Use omitempty for optional fields. Add doc comments: 'MethodName represents the request data for api.methodName.'"
+    - path: "responses/*.go"
+      instructions: "Response structs for JSON unmarshaling. Must mirror Pandora API exactly - field names, types, and JSON tags must match API documentation. Preserve typos in JSON tags (use //nolint:tagliatelle). All responses have 'stat' field ('ok' or 'fail'). Add doc comments: 'MethodName represents the response from api.methodName.'"
+    - path: "*_test.go"
+      instructions: "Test files. Prefer table-driven tests. Use t.Parallel() when safe. Keep tests deterministic. For integration tests, use //go:build integration tag. Check for proper error handling and edge cases. Test both success and failure paths."
+    - path: "*.md"
+      instructions: "Documentation files. Follow Markdown best practices. Keep documentation accurate and up-to-date. Update README.md when adding new client capabilities. AGENTS.md is the single source of truth for project guidelines."
+  abort_on_close: true
+  disable_cache: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    ignore_title_keywords: []
+    labels: []
+    drafts: false
+    base_branches: []
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+  pre_merge_checks:
+    docstrings:
+      mode: warning
+      threshold: 80
+    title:
+      mode: warning
+      requirements: "Must follow Conventional Commits specification: type(scope): description. Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore. Scopes: auth, api, cli, models, detection, alerting, etc. Breaking changes indicated with ! in header or BREAKING CHANGE: in footer."
+    description:
+      mode: warning
+    issue_assessment:
+      mode: warning
+  tools:
+    ast-grep:
+      rule_dirs: []
+      util_dirs: []
+      essential_rules: true
+      packages: []
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: false
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 300000
+    languagetool:
+      enabled: true
+      enabled_rules: []
+      disabled_rules: []
+      enabled_categories: []
+      disabled_categories: []
+      enabled_only: false
+      level: default
+    biome:
+      enabled: false
+    hadolint:
+      enabled: true
+    swiftlint:
+      enabled: false
+    phpstan:
+      enabled: false
+      level: default
+    phpmd:
+      enabled: false
+    phpcs:
+      enabled: false
+    golangci-lint:
+      enabled: true
+    yamllint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    checkov:
+      enabled: true
+    detekt:
+      enabled: false
+    eslint:
+      enabled: false
+    flake8:
+      enabled: false
+    rubocop:
+      enabled: false
+    buf:
+      enabled: false
+    regal:
+      enabled: false
+    actionlint:
+      enabled: true
+    pmd:
+      enabled: false
+    cppcheck:
+      enabled: false
+    semgrep:
+      enabled: true
+    circleci:
+      enabled: true
+    clippy:
+      enabled: false
+    sqlfluff:
+      enabled: false
+    prismaLint:
+      enabled: false
+    pylint:
+      enabled: false
+    oxc:
+      enabled: false
+    shopifyThemeCheck:
+      enabled: false
+    luacheck:
+      enabled: false
+    brakeman:
+      enabled: false
+    dotenvLint:
+      enabled: true
+    htmlhint:
+      enabled: false
+    checkmake:
+      enabled: true
+chat:
+  auto_reply: true
+  integrations:
+    jira:
+      usage: disabled
+    linear:
+      usage: disabled
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns: []
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  jira:
+    usage: disabled
+    project_keys: []
+  linear:
+    usage: disabled
+    team_keys: []
+  pull_requests:
+    scope: auto
+code_generation:
+  docstrings:
+    language: en-US
+    path_instructions:
+      - path: "gopiano.go"
+        instructions: 'Package-level doc: Describe the package purpose and link to Pandora API documentation. Exported types/functions: Use complete sentences starting with the name. For Client methods, format: ''MethodName does X. Calls API method "api.methodName".'' Include parameter descriptions and return value descriptions.'
+      - path: "auth.go"
+        instructions: 'Client methods: Format as ''MethodName does X. Calls API method "api.methodName".'' Describe what the method does, what it returns, and any side effects (e.g., setting auth tokens on client). Use complete sentences. Start with the method name.'
+      - path: "station.go"
+        instructions: 'Client methods: Format as ''MethodName does X. Calls API method "api.methodName".'' Describe what the method does and what it returns. Use complete sentences. Start with the method name.'
+      - path: "user.go"
+        instructions: 'Client methods: Format as ''MethodName does X. Calls API method "api.methodName".'' Describe what the method does and what it returns. Use complete sentences. Start with the method name.'
+      - path: "misc.go"
+        instructions: 'Client methods: Format as ''MethodName does X. Calls API method "api.methodName".'' Describe what the method does and what it returns. Use complete sentences. Start with the method name.'
+      - path: "requests/*.go"
+        instructions: "Package-level doc: 'Package requests provides structs for use with json.Marshal when sending requests to the Pandora API.' Struct doc: 'MethodName represents the request data for api.methodName.' Field comments: Explain purpose, required vs optional, and any constraints."
+      - path: "responses/*.go"
+        instructions: "Package-level doc: 'Package responses provides structs for use with json.Unmarshal when receiving responses from the Pandora API.' Struct doc: 'MethodName represents the response from api.methodName.' Field comments: Explain what the field contains and when it's present."
+  unit_tests:
+    path_instructions:
+      - path: "*_test.go"
+        instructions: "Use table-driven tests with subtests. Format: TestName_Scenario. Use t.Parallel() when safe. For integration tests, add //go:build integration at top. Test both success and error paths. Use t.Helper() for helper functions. Check error wrapping with errors.Is/errors.As. Use testify/assert or standard testing package. Keep tests deterministic - no time.Sleep, use time.Now() carefully. Test edge cases: empty inputs, nil values, invalid data."
+      - path: "*_integration_test.go"
+        instructions: "Integration tests require //go:build integration tag. Skip with t.Skip() if testing.Short(). These tests make actual API calls and require valid credentials. Test real API interactions, not mocks. Use t.Logf() for debugging output."
+      - path: "gopiano_test.go"
+        instructions: "Integration test file. Use //go:build integration tag. Set up shared test client in Test_Setup. Each test should be independent. Skip network tests in short mode. Test actual API responses and error handling."
