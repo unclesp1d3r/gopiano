@@ -26,25 +26,27 @@ Only after both steps can you call other API methods that require user authentic
 
 # Quick Start
 
+	ctx := context.Background()
+
 	client, err := gopiano.NewClient(gopiano.AndroidClient)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Step 1: Partner login (required first)
-	_, err = client.AuthPartnerLogin()
+	_, err = client.AuthPartnerLogin(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Step 2: User login (for existing users)
-	_, err = client.AuthUserLogin("user@example.com", "password")
+	_, err = client.AuthUserLogin(ctx, "user@example.com", "password")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Now you can call other methods
-	stations, err := client.UserGetStationList(false)
+	stations, err := client.UserGetStationList(ctx, false)
 
 # Important Notes
 
@@ -53,6 +55,16 @@ Only after both steps can you call other API methods that require user authentic
 - Potential for rate limiting on frequent requests
 - Error code 0 (INTERNAL) typically indicates authentication or validation issues
 - Official Pandora API now uses OAuth2 + GraphQL
+
+# Concurrency
+
+A Client is NOT safe for concurrent use by multiple goroutines. The Client stores
+authentication state (tokens, time offset) that is written during authentication
+and read during API calls without synchronization. If you need concurrent access,
+either:
+
+  - Create separate Client instances for each goroutine
+  - Protect all Client method calls with external synchronization (e.g., sync.Mutex)
 
 # Disclaimer
 
@@ -165,11 +177,12 @@ func (c *Client) decrypt(data string) (string, error) {
 }
 
 // PandoraCall is the basic function to send an HTTP POST to pandora.com.
-// Arguments: protocol is either "https://" or "http://", method is whatever must be in
+// Arguments: ctx is the context for request cancellation and deadlines,
+// protocol is either "https://" or "http://", method is whatever must be in
 // the "method" url argument and specifies the remote procedure to call, body is an io.Reader
 // to be passed directly into http.Post, and data is to be passed to json.Unmarshal to parse
 // the JSON response.
-func (c *Client) PandoraCall(protocol, method string, body io.Reader, data interface{}) error {
+func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body io.Reader, data interface{}) error {
 	urlArgs := url.Values{
 		"method": {method},
 	}
@@ -187,7 +200,7 @@ func (c *Client) PandoraCall(protocol, method string, body io.Reader, data inter
 	}
 	callURL := protocol + c.description.BaseURL + "?" + urlArgs.Encode()
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, callURL, body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, callURL, body)
 	if err != nil {
 		return err
 	}
@@ -233,13 +246,13 @@ func (c *Client) PandoraCall(protocol, method string, body io.Reader, data inter
 
 // BlowfishCall first encrypts the body before calling PandoraCall.
 // Arguments are identical to PandoraCall.
-func (c *Client) BlowfishCall(protocol, method string, body io.Reader, data interface{}) error {
+func (c *Client) BlowfishCall(ctx context.Context, protocol, method string, body io.Reader, data interface{}) error {
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		return err
 	}
 	encrypted := strings.NewReader(c.encrypt(string(bodyBytes)))
-	return c.PandoraCall(protocol, method, encrypted, data)
+	return c.PandoraCall(ctx, protocol, method, encrypted, data)
 }
 
 // GetSyncTime calculates the SyncTime for each call based on the timeOffset.

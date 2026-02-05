@@ -3,6 +3,7 @@
 package gopiano
 
 import (
+	"context"
 	"os"
 	"testing"
 )
@@ -27,7 +28,7 @@ func newAuthenticatedClient(t *testing.T) *Client {
 	t.Helper()
 	client := newClient(t)
 
-	_, err := client.AuthPartnerLogin()
+	_, err := client.AuthPartnerLogin(context.Background())
 	if err != nil {
 		t.Fatalf("failed to authenticate partner: %v", err)
 	}
@@ -41,7 +42,7 @@ func newAuthenticatedClient(t *testing.T) *Client {
 		t.Fatal("PANDORA_PASSWORD environment variable is not set")
 	}
 
-	_, err = client.AuthUserLogin(username, password)
+	_, err = client.AuthUserLogin(context.Background(), username, password)
 	if err != nil {
 		t.Fatalf("failed to authenticate user: %v", err)
 	}
@@ -51,7 +52,7 @@ func newAuthenticatedClient(t *testing.T) *Client {
 
 func Test_AuthPartnerLogin_1(t *testing.T) {
 	client := newClient(t)
-	response, err := client.AuthPartnerLogin()
+	response, err := client.AuthPartnerLogin(context.Background())
 	if err != nil {
 		t.Fatalf("AuthPartnerLogin failed: %v", err)
 	}
@@ -69,7 +70,7 @@ func Test_AuthPartnerLogin_1(t *testing.T) {
 func Test_AuthUserLogin_1(t *testing.T) {
 	client := newClient(t)
 
-	_, err := client.AuthPartnerLogin()
+	_, err := client.AuthPartnerLogin(context.Background())
 	if err != nil {
 		t.Fatalf("failed to authenticate partner: %v", err)
 	}
@@ -83,7 +84,7 @@ func Test_AuthUserLogin_1(t *testing.T) {
 		t.Fatal("PANDORA_PASSWORD environment variable is not set")
 	}
 
-	response, err := client.AuthUserLogin(username, password)
+	response, err := client.AuthUserLogin(context.Background(), username, password)
 	if err != nil {
 		t.Fatalf("AuthUserLogin failed: %v", err)
 	}
@@ -100,7 +101,7 @@ func Test_AuthUserLogin_1(t *testing.T) {
 
 func Test_UserCanSubscribe_1(t *testing.T) {
 	client := newAuthenticatedClient(t)
-	response, err := client.UserCanSubscribe()
+	response, err := client.UserCanSubscribe(context.Background())
 	if err != nil {
 		t.Fatalf("UserCanSubscribe failed: %v", err)
 	}
@@ -113,7 +114,7 @@ func Test_UserCanSubscribe_1(t *testing.T) {
 
 func Test_UserGetBookmarks_1(t *testing.T) {
 	client := newAuthenticatedClient(t)
-	response, err := client.UserGetBookmarks()
+	response, err := client.UserGetBookmarks(context.Background())
 	if err != nil {
 		t.Fatalf("UserGetBookmarks failed: %v", err)
 	}
@@ -126,7 +127,7 @@ func Test_UserGetBookmarks_1(t *testing.T) {
 
 func Test_UserGetStationList_1(t *testing.T) {
 	client := newAuthenticatedClient(t)
-	response, err := client.UserGetStationList(true)
+	response, err := client.UserGetStationList(context.Background(), true)
 	if err != nil {
 		t.Fatalf("UserGetStationList failed: %v", err)
 	}
@@ -141,7 +142,7 @@ func Test_UserGetStationList_1(t *testing.T) {
 
 func Test_UserGetStationListChecksum_1(t *testing.T) {
 	client := newAuthenticatedClient(t)
-	response, err := client.UserGetStationListChecksum()
+	response, err := client.UserGetStationListChecksum(context.Background())
 	if err != nil {
 		t.Fatalf("UserGetStationListChecksum failed: %v", err)
 	}

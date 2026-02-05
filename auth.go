@@ -2,7 +2,9 @@ package gopiano
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -19,7 +21,7 @@ import (
 // timeOffset on the client. These values are required for subsequent API calls.
 //
 // Calls API method "auth.partnerLogin".
-func (c *Client) AuthPartnerLogin() (*responses.AuthPartnerLogin, error) {
+func (c *Client) AuthPartnerLogin(ctx context.Context) (*responses.AuthPartnerLogin, error) {
 	requestData := requests.AuthPartnerLogin{
 		Username:    c.description.Username,
 		Password:    c.description.Password,
@@ -33,10 +35,9 @@ func (c *Client) AuthPartnerLogin() (*responses.AuthPartnerLogin, error) {
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 	var resp responses.AuthPartnerLogin
-	err = c.PandoraCall("https://", "auth.partnerLogin", requestDataReader, &resp)
+	err = c.PandoraCall(ctx, "https://", "auth.partnerLogin", requestDataReader, &resp)
 	if err != nil {
-		// TODO Handle error
-		return nil, err
+		return nil, fmt.Errorf("auth partner login: %w", err)
 	}
 
 	syncTime, err := c.decrypt(resp.Result.SyncTime)
@@ -62,7 +63,7 @@ func (c *Client) AuthPartnerLogin() (*responses.AuthPartnerLogin, error) {
 // You must call AuthPartnerLogin first, and then either this method or UserCreateUser
 // before you proceed.
 // Calls API method "auth.userLogin".
-func (c *Client) AuthUserLogin(username, password string) (*responses.AuthUserLogin, error) {
+func (c *Client) AuthUserLogin(ctx context.Context, username, password string) (*responses.AuthUserLogin, error) {
 	if err := c.validatePartnerAuthToken("logging in a user"); err != nil {
 		return nil, err
 	}
@@ -79,10 +80,9 @@ func (c *Client) AuthUserLogin(username, password string) (*responses.AuthUserLo
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 	var resp responses.AuthUserLogin
-	err = c.BlowfishCall("https://", "auth.userLogin", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "auth.userLogin", requestDataReader, &resp)
 	if err != nil {
-		// TODO Handle error
-		return nil, err
+		return nil, fmt.Errorf("auth user login: %w", err)
 	}
 
 	// Set user data onto client for later use.

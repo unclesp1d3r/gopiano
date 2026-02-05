@@ -12,6 +12,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -19,6 +20,9 @@ import (
 )
 
 func main() {
+	// Create a context for API calls. You can add timeout or cancellation as needed.
+	ctx := context.Background()
+
 	// Step 1: Create a client using the Android client description.
 	// This provides the necessary encryption keys and device model information
 	// that Pandora's API expects.
@@ -33,7 +37,7 @@ func main() {
 	// - Obtains partnerAuthToken and partnerID
 	// - Sets timeOffset for sync time calculations
 	// These values are stored on the client and used automatically in subsequent calls.
-	partnerResp, err := client.AuthPartnerLogin()
+	partnerResp, err := client.AuthPartnerLogin(ctx)
 	if err != nil {
 		log.Fatalf("Failed to authenticate partner: %v\n"+
 			"Note: This may fail if you're not calling from a US IP address.", err)
@@ -53,7 +57,7 @@ func main() {
 	username := "user@example.com"
 	password := "your-password"
 
-	userResp, err := client.AuthUserLogin(username, password)
+	userResp, err := client.AuthUserLogin(ctx, username, password)
 	if err != nil {
 		log.Fatalf("Failed to authenticate user: %v\n"+
 			"Common causes:\n"+
@@ -73,7 +77,7 @@ func main() {
 
 	// The client is now fully authenticated and ready for user-specific API calls.
 	// For example:
-	//   stations, err := client.UserGetStationList(false)
+	//   stations, err := client.UserGetStationList(ctx, false)
 	//   if err != nil {
 	//       log.Fatal(err)
 	//   }
