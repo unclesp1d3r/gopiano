@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -50,10 +51,12 @@ func (c *Client) AuthPartnerLogin(ctx context.Context) (*responses.AuthPartnerLo
 		return nil, err
 	}
 
-	// Set partner data onto client for later use.
+	// Set partner data onto client for later use (thread-safe).
+	c.mu.Lock()
 	c.timeOffset = time.Until(time.Unix(i, 0))
 	c.partnerAuthToken = resp.Result.PartnerAuthToken
 	c.partnerID = resp.Result.PartnerID
+	c.mu.Unlock()
 
 	return &resp, nil
 }
@@ -64,6 +67,12 @@ func (c *Client) AuthPartnerLogin(ctx context.Context) (*responses.AuthPartnerLo
 // before you proceed.
 // Calls API method "auth.userLogin".
 func (c *Client) AuthUserLogin(ctx context.Context, username, password string) (*responses.AuthUserLogin, error) {
+	if err := validateEmail(username); err != nil {
+		return nil, fmt.Errorf("invalid username: %w", err)
+	}
+	if password == "" {
+		return nil, errors.New("password is required")
+	}
 	if err := c.validatePartnerAuthToken("logging in a user"); err != nil {
 		return nil, err
 	}
@@ -85,9 +94,11 @@ func (c *Client) AuthUserLogin(ctx context.Context, username, password string) (
 		return nil, fmt.Errorf("auth user login: %w", err)
 	}
 
-	// Set user data onto client for later use.
+	// Set user data onto client for later use (thread-safe).
+	c.mu.Lock()
 	c.userAuthToken = resp.Result.UserAuthToken
 	c.userID = resp.Result.UserID
+	c.mu.Unlock()
 
 	return &resp, nil
 }

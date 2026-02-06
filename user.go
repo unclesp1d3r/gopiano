@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
 	"github.com/unclesp1d3r/gopiano/responses"
@@ -26,9 +28,9 @@ func (c *Client) UserCanSubscribe(ctx context.Context) (*responses.UserCanSubscr
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 	var resp responses.UserCanSubscribe
-	err = c.BlowfishCall(ctx, "http://", "user.canSubscribe", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "user.canSubscribe", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("check subscription status: %w", err)
 	}
 
 	return &resp, nil
@@ -60,6 +62,19 @@ func (c *Client) UserCreateUser(
 	zipCode, birthYear int,
 	emailOptin bool,
 ) (*responses.UserCreateUser, error) {
+	// Validate inputs
+	if err := validateEmail(username); err != nil {
+		return nil, fmt.Errorf("invalid username: %w", err)
+	}
+	if password == "" {
+		return nil, errors.New("password is required")
+	}
+	if gender != "male" && gender != "female" {
+		return nil, fmt.Errorf("gender must be 'male' or 'female', got: %s", gender)
+	}
+	if countryCode != "US" {
+		return nil, fmt.Errorf("country code must be 'US', got: %s", countryCode)
+	}
 	if err := c.validatePartnerAuthToken("creating a user"); err != nil {
 		return nil, err
 	}
@@ -84,12 +99,14 @@ func (c *Client) UserCreateUser(
 	var resp responses.UserCreateUser
 	err = c.BlowfishCall(ctx, "https://", "user.createUser", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 
-	// Set user data onto client for later use.
+	// Set user data onto client for later use (thread-safe).
+	c.mu.Lock()
 	c.userAuthToken = resp.Result.UserAuthToken
 	c.userID = resp.Result.UserID
+	c.mu.Unlock()
 
 	return &resp, nil
 }
@@ -110,8 +127,11 @@ func (c *Client) UserEmailPassword(ctx context.Context, username string) error {
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "https://", "user.emailPassword", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "user.emailPassword", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("email password: %w", err)
+	}
+	return nil
 }
 
 // UserGetBookmarks returns the user's bookmarked artists and songs.
@@ -132,9 +152,9 @@ func (c *Client) UserGetBookmarks(ctx context.Context) (*responses.UserGetBookma
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 	var resp responses.UserGetBookmarks
-	err = c.BlowfishCall(ctx, "http://", "user.getBookmarks", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "user.getBookmarks", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get bookmarks: %w", err)
 	}
 	return &resp, nil
 }
@@ -161,9 +181,9 @@ func (c *Client) UserGetStationList(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.UserGetStationList
-	err = c.BlowfishCall(ctx, "http://", "user.getStationList", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "user.getStationList", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get station list: %w", err)
 	}
 	return &resp, nil
 }
@@ -186,9 +206,9 @@ func (c *Client) UserGetStationListChecksum(ctx context.Context) (*responses.Use
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.UserGetStationListChecksum
-	err = c.BlowfishCall(ctx, "http://", "user.getStationListChecksum", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "user.getStationListChecksum", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get station list checksum: %w", err)
 	}
 	return &resp, nil
 }
@@ -209,8 +229,11 @@ func (c *Client) UserSetQuickMix(ctx context.Context, stationIDs []string) error
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "https://", "user.setQuickMix", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "user.setQuickMix", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("set quick mix: %w", err)
+	}
+	return nil
 }
 
 // UserSleepSong marks a song to not be played again for 1 month.
@@ -229,6 +252,9 @@ func (c *Client) UserSleepSong(ctx context.Context, trackToken string) error {
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "https://", "user.sleepSong", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "user.sleepSong", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("sleep song: %w", err)
+	}
+	return nil
 }

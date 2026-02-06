@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
 	"github.com/unclesp1d3r/gopiano/responses"
@@ -34,9 +35,9 @@ func (c *Client) StationAddFeedback(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationAddFeedback
-	err = c.BlowfishCall(ctx, "http://", "station.addFeedback", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.addFeedback", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add feedback: %w", err)
 	}
 	return &resp, nil
 }
@@ -65,9 +66,9 @@ func (c *Client) StationAddMusic(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationAddMusic
-	err = c.BlowfishCall(ctx, "http://", "station.addMusic", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.addMusic", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add music: %w", err)
 	}
 	return &resp, nil
 }
@@ -96,9 +97,9 @@ func (c *Client) StationCreateStationTrack(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationCreateStation
-	err = c.BlowfishCall(ctx, "http://", "station.createStation", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.createStation", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create station from track: %w", err)
 	}
 	return &resp, nil
 }
@@ -125,9 +126,9 @@ func (c *Client) StationCreateStationMusic(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationCreateStation
-	err = c.BlowfishCall(ctx, "http://", "station.createStation", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.createStation", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create station from music: %w", err)
 	}
 	return &resp, nil
 }
@@ -148,8 +149,11 @@ func (c *Client) StationDeleteFeedback(ctx context.Context, feedbackID string) e
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "http://", "station.deleteFeedback", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "station.deleteFeedback", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("delete feedback: %w", err)
+	}
+	return nil
 }
 
 // StationDeleteMusic removes seed music identified by a seedID from a station.
@@ -168,8 +172,11 @@ func (c *Client) StationDeleteMusic(ctx context.Context, seedID string) error {
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "http://", "station.deleteMusic", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "station.deleteMusic", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("delete music: %w", err)
+	}
+	return nil
 }
 
 // StationDeleteStation removes a station identified by a stationToken.
@@ -188,8 +195,11 @@ func (c *Client) StationDeleteStation(ctx context.Context, stationToken string) 
 		return err
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp interface{}
-	return c.BlowfishCall(ctx, "http://", "station.deleteStation", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "station.deleteStation", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("delete station: %w", err)
+	}
+	return nil
 }
 
 // StationGetGenreStations retrieves a list of predefined "genre stations".
@@ -209,9 +219,9 @@ func (c *Client) StationGetGenreStations(ctx context.Context) (*responses.Statio
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationGetGenreStations
-	err = c.BlowfishCall(ctx, "http://", "station.getGenreStations", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.getGenreStations", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get genre stations: %w", err)
 	}
 	return &resp, nil
 }
@@ -268,9 +278,9 @@ func (c *Client) StationGetStation(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationGetStation
-	err = c.BlowfishCall(ctx, "http://", "station.getStation", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.getStation", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get station: %w", err)
 	}
 	return &resp, nil
 }
@@ -300,8 +310,11 @@ func (c *Client) StationShareStation(
 	}
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
-	var resp interface{}
-	return c.BlowfishCall(ctx, "http://", "station.shareStation", requestDataReader, &resp)
+	var resp any
+	if err = c.BlowfishCall(ctx, "https://", "station.shareStation", requestDataReader, &resp); err != nil {
+		return fmt.Errorf("share station: %w", err)
+	}
+	return nil
 }
 
 // StationRenameStation sets a new name for a station.
@@ -326,9 +339,9 @@ func (c *Client) StationRenameStation(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationRenameStation
-	err = c.BlowfishCall(ctx, "http://", "station.renameStation", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.renameStation", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rename station: %w", err)
 	}
 	return &resp, nil
 }
@@ -354,9 +367,9 @@ func (c *Client) StationTransformSharedStation(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.StationTransformSharedStation
-	err = c.BlowfishCall(ctx, "http://", "station.transformSharedStation", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "station.transformSharedStation", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("transform shared station: %w", err)
 	}
 	return &resp, nil
 }

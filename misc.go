@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
 	"github.com/unclesp1d3r/gopiano/responses"
@@ -28,9 +29,9 @@ func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*response
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.ExplainTrack
-	err = c.BlowfishCall(ctx, "http://", "track.explainTrack", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "track.explainTrack", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("explain track: %w", err)
 	}
 	return &resp, nil
 }
@@ -53,9 +54,9 @@ func (c *Client) MusicSearch(ctx context.Context, searchText string) (*responses
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.MusicSearch
-	err = c.BlowfishCall(ctx, "http://", "music.search", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "music.search", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("music search: %w", err)
 	}
 	return &resp, nil
 }
@@ -82,9 +83,9 @@ func (c *Client) BookmarkAddArtistBookmark(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.BookmarkAddArtistBookmark
-	err = c.BlowfishCall(ctx, "http://", "bookmark.addArtistBookmark", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "bookmark.addArtistBookmark", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add artist bookmark: %w", err)
 	}
 	return &resp, nil
 }
@@ -111,9 +112,9 @@ func (c *Client) BookmarkAddSongBookmark(
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.BookmarkAddSongBookmark
-	err = c.BlowfishCall(ctx, "http://", "bookmark.addSongBookmark", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "bookmark.addSongBookmark", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add song bookmark: %w", err)
 	}
 	return &resp, nil
 }
