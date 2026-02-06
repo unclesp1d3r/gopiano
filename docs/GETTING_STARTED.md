@@ -66,7 +66,7 @@ func main() {
 
 gopiano requires a **two-step authentication process**:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Authentication Flow                       │
 ├─────────────────────────────────────────────────────────────┤

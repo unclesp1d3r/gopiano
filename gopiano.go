@@ -58,13 +58,12 @@ Only after both steps can you call other API methods that require user authentic
 
 # Concurrency
 
-A Client is NOT safe for concurrent use by multiple goroutines. The Client stores
-authentication state (tokens, time offset) that is written during authentication
-and read during API calls without synchronization. If you need concurrent access,
-either:
+A Client is safe for concurrent use by multiple goroutines. The Client uses
+an internal mutex (sync.RWMutex) to protect authentication state (tokens, time
+offset) during reads and writes.
 
-  - Create separate Client instances for each goroutine
-  - Protect all Client method calls with external synchronization (e.g., sync.Mutex)
+For best performance in highly concurrent scenarios, consider creating separate
+Client instances per goroutine to avoid lock contention.
 
 # Disclaimer
 
@@ -132,9 +131,10 @@ var AndroidClient = ClientDescription{ //nolint:gochecknoglobals // exported by 
 
 // Client represents a Pandora client.
 //
-// The Client maintains authentication state and is protected by a mutex for
-// safe concurrent access. However, for best performance in highly concurrent
-// scenarios, consider creating separate Client instances per goroutine.
+// The Client is safe for concurrent use by multiple goroutines. It maintains
+// authentication state protected by an internal mutex (sync.RWMutex).
+// For best performance in highly concurrent scenarios, consider creating
+// separate Client instances per goroutine to avoid lock contention.
 type Client struct {
 	// mu protects all mutable fields below
 	mu sync.RWMutex
@@ -329,7 +329,7 @@ func validateEmail(email string) error {
 		return errors.New("email address is required")
 	}
 	if !emailRegex.MatchString(email) {
-		return fmt.Errorf("invalid email format: %s", email)
+		return errors.New("invalid email format")
 	}
 	return nil
 }
