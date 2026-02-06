@@ -39,7 +39,7 @@ graph TB
     Misc --> Core
     Core --> Requests
     Core --> Responses
-    Core -->|HTTPS/HTTP| Pandora
+    Core -->|HTTPS| Pandora
     Pandora -->|JSON| Core
 ```
 

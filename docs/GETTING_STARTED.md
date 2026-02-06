@@ -300,9 +300,19 @@ The `Client` is **NOT thread-safe**. For concurrent use:
 ```go
 // Option 1: Create separate clients per goroutine
 go func() {
-    client, _ := gopiano.NewClient(gopiano.AndroidClient)
-    client.AuthPartnerLogin(ctx)
-    client.AuthUserLogin(ctx, email, password)
+    client, err := gopiano.NewClient(gopiano.AndroidClient)
+    if err != nil {
+        log.Printf("Failed to create client: %v", err)
+        return
+    }
+    if _, err := client.AuthPartnerLogin(ctx); err != nil {
+        log.Printf("Partner login failed: %v", err)
+        return
+    }
+    if _, err := client.AuthUserLogin(ctx, email, password); err != nil {
+        log.Printf("User login failed: %v", err)
+        return
+    }
     // Use client...
 }()
 
@@ -311,6 +321,9 @@ var mu sync.Mutex
 mu.Lock()
 stations, err := client.UserGetStationList(ctx, false)
 mu.Unlock()
+if err != nil {
+    log.Fatal(err)
+}
 ```
 
 ### API Status
