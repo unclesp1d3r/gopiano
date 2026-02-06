@@ -34,11 +34,21 @@ import (
 func main() {
     ctx := context.Background()
 
-    client, _ := gopiano.NewClient(gopiano.AndroidClient)
-    client.AuthPartnerLogin(ctx)    // Step 1: Partner auth
-    client.AuthUserLogin(ctx, "email", "password")  // Step 2: User auth
+    client, err := gopiano.NewClient(gopiano.AndroidClient)
+    if err != nil {
+        log.Fatal(err)
+    }
+    if _, err := client.AuthPartnerLogin(ctx); err != nil {
+        log.Fatal(err)
+    }
+    if _, err := client.AuthUserLogin(ctx, "email", "password"); err != nil {
+        log.Fatal(err)
+    }
 
-    stations, _ := client.UserGetStationList(ctx, false)
+    stations, err := client.UserGetStationList(ctx, false)
+    if err != nil {
+        log.Fatal(err)
+    }
     for _, s := range stations.Result.Stations {
         fmt.Println(s.StationName)
     }
@@ -64,12 +74,13 @@ func main() {
 ## Error Handling
 
 ```go
-if err != nil {
-    if pe, ok := err.(responses.PandoraError); ok {
-        fmt.Printf("API Error %d: %s\n", pe.Code, pe.Message)
-    } else {
-        fmt.Printf("Error: %v\n", err)
-    }
+import "errors"
+
+var pe responses.PandoraError
+if errors.As(err, &pe) {
+    fmt.Printf("API Error %d: %s\n", pe.Code, pe.Message)
+} else {
+    fmt.Printf("Error: %v\n", err)
 }
 ```
 

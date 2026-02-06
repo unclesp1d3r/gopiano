@@ -249,12 +249,17 @@ if err != nil {
 gopiano provides detailed error information:
 
 ```go
-import "github.com/unclesp1d3r/gopiano/responses"
+import (
+    "errors"
+
+    "github.com/unclesp1d3r/gopiano/responses"
+)
 
 stations, err := client.UserGetStationList(ctx, false)
 if err != nil {
-    // Check if it's a Pandora API error
-    if pandoraErr, ok := err.(responses.PandoraError); ok {
+    // Check if it's a Pandora API error (use errors.As for wrapped errors)
+    var pandoraErr responses.PandoraError
+    if errors.As(err, &pandoraErr) {
         fmt.Printf("Pandora Error Code: %d\n", pandoraErr.Code)
         fmt.Printf("Message: %s\n", pandoraErr.Message)
 

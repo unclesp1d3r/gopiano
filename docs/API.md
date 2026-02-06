@@ -585,11 +585,14 @@ func (e PandoraError) Error() string
 Methods validate authentication state before making API calls:
 
 ```go
+import "errors"
+
 // Returns standard Go error if not authenticated
 resp, err := client.UserGetStationList(ctx, false)
 if err != nil {
     // Could be validation error or API error
-    if pe, ok := err.(responses.PandoraError); ok {
+    var pe responses.PandoraError
+    if errors.As(err, &pe) {
         // API error with code
         fmt.Printf("API Error %d: %s\n", pe.Code, pe.Message)
     } else {
