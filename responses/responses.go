@@ -8,6 +8,54 @@ import (
 	"time"
 )
 
+// Pandora API error codes.
+const (
+	ErrorCodeInternal                   = 0
+	ErrorCodeMaintenanceMode            = 1
+	ErrorCodeURLParamMissingMethod      = 2
+	ErrorCodeURLParamMissingAuthToken   = 3
+	ErrorCodeURLParamMissingPartnerID   = 4
+	ErrorCodeURLParamMissingUserID      = 5
+	ErrorCodeSecureProtocolRequired     = 6
+	ErrorCodeCertificateRequired        = 7
+	ErrorCodeParameterTypeMismatch      = 8
+	ErrorCodeParameterMissing           = 9
+	ErrorCodeParameterValueInvalid      = 10
+	ErrorCodeAPIVersionNotSupported     = 11
+	ErrorCodeLicensingRestrictions      = 12
+	ErrorCodeInsufficientConnectivity   = 13
+	ErrorCodeUnknownMethodName          = 14
+	ErrorCodeWrongProtocol              = 15
+	ErrorCodeReadOnlyMode               = 1000
+	ErrorCodeInvalidAuthToken           = 1001
+	ErrorCodeInvalidPartnerLogin        = 1002
+	ErrorCodeListenerNotAuthorized      = 1003
+	ErrorCodeUserNotAuthorized          = 1004
+	ErrorCodeMaxStationsReached         = 1005
+	ErrorCodeStationDoesNotExist        = 1006
+	ErrorCodeComplimentaryPeriodInUse   = 1007
+	ErrorCodeCallNotAllowed             = 1008
+	ErrorCodeDeviceNotFound             = 1009
+	ErrorCodePartnerNotAuthorized       = 1010
+	ErrorCodeInvalidUsername            = 1011
+	ErrorCodeInvalidPassword            = 1012
+	ErrorCodeUsernameAlreadyExists      = 1013
+	ErrorCodeDeviceAlreadyAssociated    = 1014
+	ErrorCodeUpgradeDeviceModelInvalid  = 1015
+	ErrorCodeExplicitPinIncorrect       = 1018
+	ErrorCodeExplicitPinMalformed       = 1020
+	ErrorCodeDeviceModelInvalid         = 1023
+	ErrorCodeZipCodeInvalid             = 1024
+	ErrorCodeBirthYearInvalid           = 1025
+	ErrorCodeBirthYearTooYoung          = 1026
+	ErrorCodeInvalidCountryCodeOrGender = 1027
+	ErrorCodeDeviceDisabled             = 1034
+	ErrorCodeDailyTrialLimitReached     = 1035
+	ErrorCodeInvalidSponsor             = 1036
+	ErrorCodeUserAlreadyUsedTrial       = 1037
+	ErrorCodePlaylistExceeded           = 1039
+)
+
 // ErrorCodeMap maps Pandora API error codes to their string names.
 //
 // Error code 0 (INTERNAL) is a generic error that often indicates authentication issues,

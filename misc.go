@@ -2,7 +2,9 @@ package gopiano
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
 	"github.com/unclesp1d3r/gopiano/responses"
@@ -11,7 +13,7 @@ import (
 // ExplainTrack retrieves an incomplete list of attributes assigned to a specified song by the
 // Music Genome Project.
 // Calls API method "track.explainTrack".
-func (c *Client) ExplainTrack(trackToken string) (*responses.ExplainTrack, error) {
+func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*responses.ExplainTrack, error) {
 	if err := c.validateUserAuthToken("explaining track"); err != nil {
 		return nil, err
 	}
@@ -27,16 +29,16 @@ func (c *Client) ExplainTrack(trackToken string) (*responses.ExplainTrack, error
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.ExplainTrack
-	err = c.BlowfishCall("http://", "track.explainTrack", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "track.explainTrack", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("explain track: %w", err)
 	}
 	return &resp, nil
 }
 
 // MusicSearch searches for music, which can be used to create a new or add seeds to a station.
 // Calls API method "music.search".
-func (c *Client) MusicSearch(searchText string) (*responses.MusicSearch, error) {
+func (c *Client) MusicSearch(ctx context.Context, searchText string) (*responses.MusicSearch, error) {
 	if err := c.validateUserAuthToken("searching music"); err != nil {
 		return nil, err
 	}
@@ -52,9 +54,9 @@ func (c *Client) MusicSearch(searchText string) (*responses.MusicSearch, error) 
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.MusicSearch
-	err = c.BlowfishCall("http://", "music.search", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "music.search", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("music search: %w", err)
 	}
 	return &resp, nil
 }
@@ -62,7 +64,10 @@ func (c *Client) MusicSearch(searchText string) (*responses.MusicSearch, error) 
 // BookmarkAddArtistBookmark bookmarks an artist.
 // Argument trackToken is a token of a specific artist.
 // Calls API method "bookmark.addArtistBookmark".
-func (c *Client) BookmarkAddArtistBookmark(trackToken string) (*responses.BookmarkAddArtistBookmark, error) {
+func (c *Client) BookmarkAddArtistBookmark(
+	ctx context.Context,
+	trackToken string,
+) (*responses.BookmarkAddArtistBookmark, error) {
 	if err := c.validateUserAuthToken("bookmarking artist"); err != nil {
 		return nil, err
 	}
@@ -78,9 +83,9 @@ func (c *Client) BookmarkAddArtistBookmark(trackToken string) (*responses.Bookma
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.BookmarkAddArtistBookmark
-	err = c.BlowfishCall("http://", "bookmark.addArtistBookmark", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "bookmark.addArtistBookmark", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add artist bookmark: %w", err)
 	}
 	return &resp, nil
 }
@@ -88,7 +93,10 @@ func (c *Client) BookmarkAddArtistBookmark(trackToken string) (*responses.Bookma
 // BookmarkAddSongBookmark bookmarks a song.
 // Argument trackToken is a token of a specific song.
 // Calls API method "bookmark.addSongBookmark".
-func (c *Client) BookmarkAddSongBookmark(trackToken string) (*responses.BookmarkAddSongBookmark, error) {
+func (c *Client) BookmarkAddSongBookmark(
+	ctx context.Context,
+	trackToken string,
+) (*responses.BookmarkAddSongBookmark, error) {
 	if err := c.validateUserAuthToken("bookmarking song"); err != nil {
 		return nil, err
 	}
@@ -104,9 +112,9 @@ func (c *Client) BookmarkAddSongBookmark(trackToken string) (*responses.Bookmark
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 
 	var resp responses.BookmarkAddSongBookmark
-	err = c.BlowfishCall("http://", "bookmark.addSongBookmark", requestDataReader, &resp)
+	err = c.BlowfishCall(ctx, "https://", "bookmark.addSongBookmark", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("add song bookmark: %w", err)
 	}
 	return &resp, nil
 }

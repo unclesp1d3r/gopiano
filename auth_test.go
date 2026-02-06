@@ -1,6 +1,7 @@
 package gopiano
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -18,7 +19,7 @@ func TestAuthUserLogin_MissingPartnerAuthToken(t *testing.T) {
 	}
 
 	// Attempt to login a user without partner authentication
-	_, err = client.AuthUserLogin("user@example.com", "password")
+	_, err = client.AuthUserLogin(context.Background(), "user@example.com", "password")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "partner authentication token missing", "AuthPartnerLogin")

@@ -1,6 +1,7 @@
 package gopiano
 
 import (
+	"context"
 	"testing"
 )
 
@@ -15,6 +16,7 @@ func TestUserCreateUser_MissingPartnerAuthToken(t *testing.T) {
 
 	// Attempt to create a user without partner authentication
 	_, err = client.UserCreateUser(
+		context.Background(),
 		"user@example.com",
 		"password",
 		"male",
@@ -38,7 +40,7 @@ func TestUserEmailPassword_MissingPartnerAuthToken(t *testing.T) {
 	}
 
 	// Attempt to resend registration email without partner authentication
-	err = client.UserEmailPassword("user@example.com")
+	err = client.UserEmailPassword(context.Background(), "user@example.com")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "partner authentication token missing", "AuthPartnerLogin")
@@ -59,7 +61,7 @@ func TestUserCanSubscribe_MissingUserAuthToken(t *testing.T) {
 	// by creating a client and not calling AuthUserLogin() or UserCreateUser()
 
 	// Attempt to check subscription status without user authentication
-	_, err = client.UserCanSubscribe()
+	_, err = client.UserCanSubscribe(context.Background())
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -73,7 +75,7 @@ func TestUserGetBookmarks_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.UserGetBookmarks()
+	_, err = client.UserGetBookmarks(context.Background())
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -87,7 +89,7 @@ func TestUserGetStationList_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.UserGetStationList(false)
+	_, err = client.UserGetStationList(context.Background(), false)
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -101,7 +103,7 @@ func TestUserGetStationListChecksum_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.UserGetStationListChecksum()
+	_, err = client.UserGetStationListChecksum(context.Background())
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -115,7 +117,7 @@ func TestUserSetQuickMix_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.UserSetQuickMix([]string{"station1"})
+	err = client.UserSetQuickMix(context.Background(), []string{"station1"})
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -129,7 +131,7 @@ func TestUserSleepSong_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	err = client.UserSleepSong("trackToken123")
+	err = client.UserSleepSong(context.Background(), "trackToken123")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")

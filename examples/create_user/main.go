@@ -12,6 +12,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -19,6 +20,9 @@ import (
 )
 
 func main() {
+	// Create a context for API calls. You can add timeout or cancellation as needed.
+	ctx := context.Background()
+
 	// Step 1: Create a client using the Android client description.
 	// This provides the necessary encryption keys and device model information.
 	client, err := gopiano.NewClient(gopiano.AndroidClient)
@@ -29,7 +33,7 @@ func main() {
 	// Step 2: Establish partner session (REQUIRED FIRST).
 	// This MUST be called before any other API methods. It obtains the partner
 	// authentication token that is required for subsequent calls, including UserCreateUser.
-	partnerResp, err := client.AuthPartnerLogin()
+	partnerResp, err := client.AuthPartnerLogin(ctx)
 	if err != nil {
 		log.Fatalf("Failed to authenticate partner: %v\n"+
 			"Note: This may fail if you're not calling from a US IP address.", err)
@@ -60,6 +64,7 @@ func main() {
 	emailOptin := false
 
 	userResp, err := client.UserCreateUser(
+		ctx,
 		username,
 		password,
 		gender,
@@ -90,5 +95,5 @@ func main() {
 
 	// The client is now fully authenticated and ready for user-specific API calls.
 	// For example, you could now call:
-	//   stations, err := client.UserGetStationList(false)
+	//   stations, err := client.UserGetStationList(ctx, false)
 }
