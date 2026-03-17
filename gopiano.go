@@ -385,6 +385,35 @@ func (c *Client) BlowfishCall(ctx context.Context, protocol, method string, body
 	return c.PandoraCall(ctx, protocol, method, encrypted, data)
 }
 
+// blowfishCallJSON marshals the request, encrypts it, calls the API, and unmarshals the response.
+// This is an internal generic helper that eliminates the repeated marshal-encrypt-call-unmarshal
+// boilerplate found in most API methods.
+func blowfishCallJSON[Resp any](ctx context.Context, c *Client, method string, request any) (*Resp, error) {
+	data, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	encrypted := strings.NewReader(c.encrypt(string(data)))
+	var resp Resp
+	err = c.PandoraCall(ctx, "https://", method, encrypted, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// blowfishCallVoid marshals the request, encrypts it, and calls the API with no response parsing.
+// This is an internal helper for API methods that return only an error with no meaningful response body.
+func blowfishCallVoid(ctx context.Context, c *Client, method string, request any) error {
+	data, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+	encrypted := strings.NewReader(c.encrypt(string(data)))
+	var resp any
+	return c.PandoraCall(ctx, "https://", method, encrypted, &resp)
+}
+
 // GetSyncTime calculates the SyncTime for each call based on the timeOffset.
 func (c *Client) GetSyncTime() int {
 	c.mu.RLock()

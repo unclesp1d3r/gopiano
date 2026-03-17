@@ -1,9 +1,7 @@
 package gopiano
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -27,18 +25,11 @@ func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*response
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.ExplainTrack
-	err = c.BlowfishCall(ctx, "https://", "track.explainTrack", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.ExplainTrack](ctx, c, "track.explainTrack", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("explain track: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // MusicSearch searches for music, which can be used to create a new or add seeds to a station.
@@ -56,18 +47,11 @@ func (c *Client) MusicSearch(ctx context.Context, searchText string) (*responses
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.MusicSearch
-	err = c.BlowfishCall(ctx, "https://", "music.search", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.MusicSearch](ctx, c, "music.search", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("music search: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // BookmarkAddArtistBookmark bookmarks an artist.
@@ -89,18 +73,16 @@ func (c *Client) BookmarkAddArtistBookmark(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.BookmarkAddArtistBookmark
-	err = c.BlowfishCall(ctx, "https://", "bookmark.addArtistBookmark", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.BookmarkAddArtistBookmark](
+		ctx,
+		c,
+		"bookmark.addArtistBookmark",
+		requestData,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("add artist bookmark: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // BookmarkAddSongBookmark bookmarks a song.
@@ -122,16 +104,9 @@ func (c *Client) BookmarkAddSongBookmark(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.BookmarkAddSongBookmark
-	err = c.BlowfishCall(ctx, "https://", "bookmark.addSongBookmark", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.BookmarkAddSongBookmark](ctx, c, "bookmark.addSongBookmark", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("add song bookmark: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }

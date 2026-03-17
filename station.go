@@ -1,9 +1,7 @@
 package gopiano
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -33,18 +31,11 @@ func (c *Client) StationAddFeedback(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationAddFeedback
-	err = c.BlowfishCall(ctx, "https://", "station.addFeedback", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationAddFeedback](ctx, c, "station.addFeedback", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("add feedback: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationAddMusic adds an additional music seed to an existing station.
@@ -71,18 +62,11 @@ func (c *Client) StationAddMusic(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationAddMusic
-	err = c.BlowfishCall(ctx, "https://", "station.addMusic", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationAddMusic](ctx, c, "station.addMusic", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("add music: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationCreateStationTrack creates a new station from a specified track.
@@ -112,18 +96,11 @@ func (c *Client) StationCreateStationTrack(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationCreateStation
-	err = c.BlowfishCall(ctx, "https://", "station.createStation", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationCreateStation](ctx, c, "station.createStation", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("create station from track: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationCreateStationMusic creates a new station from a music search result.
@@ -145,18 +122,11 @@ func (c *Client) StationCreateStationMusic(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationCreateStation
-	err = c.BlowfishCall(ctx, "https://", "station.createStation", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationCreateStation](ctx, c, "station.createStation", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("create station from music: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationDeleteFeedback deletes feedback (thumbs up/down) on a track's feedback ID.
@@ -174,13 +144,7 @@ func (c *Client) StationDeleteFeedback(ctx context.Context, feedbackID string) e
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "station.deleteFeedback", requestDataReader, &resp); err != nil {
+	if err := blowfishCallVoid(ctx, c, "station.deleteFeedback", requestData); err != nil {
 		return fmt.Errorf("delete feedback: %w", err)
 	}
 	return nil
@@ -201,13 +165,7 @@ func (c *Client) StationDeleteMusic(ctx context.Context, seedID string) error {
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "station.deleteMusic", requestDataReader, &resp); err != nil {
+	if err := blowfishCallVoid(ctx, c, "station.deleteMusic", requestData); err != nil {
 		return fmt.Errorf("delete music: %w", err)
 	}
 	return nil
@@ -228,13 +186,7 @@ func (c *Client) StationDeleteStation(ctx context.Context, stationToken string) 
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "station.deleteStation", requestDataReader, &resp); err != nil {
+	if err := blowfishCallVoid(ctx, c, "station.deleteStation", requestData); err != nil {
 		return fmt.Errorf("delete station: %w", err)
 	}
 	return nil
@@ -251,18 +203,11 @@ func (c *Client) StationGetGenreStations(ctx context.Context) (*responses.Statio
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationGetGenreStations
-	err = c.BlowfishCall(ctx, "https://", "station.getGenreStations", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationGetGenreStations](ctx, c, "station.getGenreStations", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("get genre stations: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationGetGenreStationsChecksum retrieves the checksum of the genre stations list.
@@ -279,18 +224,16 @@ func (c *Client) StationGetGenreStationsChecksum(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationGetGenreStationsChecksum
-	err = c.BlowfishCall(ctx, "https://", "station.getGenreStationsChecksum", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationGetGenreStationsChecksum](
+		ctx,
+		c,
+		"station.getGenreStationsChecksum",
+		requestData,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("get genre stations checksum: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationGetPlaylist retrieves a playlist for a specified token.
@@ -310,18 +253,11 @@ func (c *Client) StationGetPlaylist(ctx context.Context, stationToken string) (*
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationGetPlaylist
-	err = c.BlowfishCall(ctx, "https://", "station.getPlaylist", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationGetPlaylist](ctx, c, "station.getPlaylist", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("get playlist: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationGetStation retrieves station details.
@@ -346,18 +282,11 @@ func (c *Client) StationGetStation(
 		UserAuthToken:             userAuthToken,
 		SyncTime:                  c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationGetStation
-	err = c.BlowfishCall(ctx, "https://", "station.getStation", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationGetStation](ctx, c, "station.getStation", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("get station: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationShareStation shares a station with provided email addresses.
@@ -389,14 +318,7 @@ func (c *Client) StationShareStation(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "station.shareStation", requestDataReader, &resp); err != nil {
+	if err := blowfishCallVoid(ctx, c, "station.shareStation", requestData); err != nil {
 		return fmt.Errorf("share station: %w", err)
 	}
 	return nil
@@ -424,18 +346,11 @@ func (c *Client) StationRenameStation(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationRenameStation
-	err = c.BlowfishCall(ctx, "https://", "station.renameStation", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationRenameStation](ctx, c, "station.renameStation", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("rename station: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // StationTransformSharedStation copies a shared station and creates a user-editable station.
@@ -456,16 +371,14 @@ func (c *Client) StationTransformSharedStation(
 		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.StationTransformSharedStation
-	err = c.BlowfishCall(ctx, "https://", "station.transformSharedStation", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.StationTransformSharedStation](
+		ctx,
+		c,
+		"station.transformSharedStation",
+		requestData,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("transform shared station: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }

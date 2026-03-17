@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Run tests
+        run: go test -race ./...
+
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@v2
+
+      - name: Generate changelog
+        run: |
+          pip install git-cliff
+          git-cliff --latest --strip header > CHANGELOG.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: CHANGELOG.md
