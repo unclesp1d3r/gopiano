@@ -15,7 +15,6 @@ repos:
       - id: check-yaml
         args: [--unsafe]
       - id: check-xml
-        exclude: ^internal/cfgparser/testdata/
       - id: mixed-line-ending
         args: [--fix=auto]
       - id: check-docstring-first
@@ -26,6 +25,11 @@ repos:
     hooks:
       - id: actionlint
         files: ".github/workflows/"
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
 
   - repo: https://github.com/executablebooks/mdformat
     rev: 1.0.0
@@ -43,4 +47,3 @@ repos:
           - mdformat-toc
           - mdformat-front-matters
         types: [markdown]
-        exclude: \.golden\.md$
