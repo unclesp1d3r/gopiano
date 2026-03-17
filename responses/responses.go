@@ -4,7 +4,9 @@
 package responses
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -290,17 +292,24 @@ type Station struct {
 // StationList represents a list of stations that implements sort.Interface.
 type StationList []Station
 
-// Len returns the number of stations in the list.
+// SortByName sorts the station list alphabetically by station name.
+func (s StationList) SortByName() {
+	slices.SortFunc([]Station(s), func(a, b Station) int {
+		return cmp.Compare(a.StationName, b.StationName)
+	})
+}
+
+// Deprecated: Use SortByName instead. Len implements sort.Interface.
 func (s StationList) Len() int {
 	return len(s)
 }
 
-// Swap swaps the stations at indices i and j.
+// Deprecated: Use SortByName instead. Swap implements sort.Interface.
 func (s StationList) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// Less reports whether the station at index i sorts before index j by station name.
+// Deprecated: Use SortByName instead. Less implements sort.Interface.
 func (s StationList) Less(i, j int) bool {
 	return s[i].StationName < s[j].StationName
 }

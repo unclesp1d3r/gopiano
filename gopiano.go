@@ -122,6 +122,9 @@ type ClientDescription struct {
 
 // AndroidClient is the data for the Android client.
 //
+// Deprecated: AndroidClient is a mutable global variable. Use DefaultAndroidClient() instead,
+// which returns a fresh copy and avoids accidental mutation of shared state.
+//
 // SECURITY NOTE: These are partner-level credentials for the unofficial Pandora API,
 // not user credentials. They are publicly documented and required for API communication.
 // User credentials (email/password) are transmitted separately and securely over HTTPS.
@@ -136,6 +139,20 @@ var AndroidClient = ClientDescription{ //nolint:gochecknoglobals,gosec // export
 	Version:     "5",
 }
 
+// DefaultAndroidClient returns a fresh copy of the Android client description.
+// Use this instead of the AndroidClient global variable to avoid accidental mutation of shared state.
+func DefaultAndroidClient() ClientDescription {
+	return ClientDescription{ //nolint:gosec // partner credentials are public, not user secrets
+		DeviceModel: "android-generic",
+		Username:    "android",
+		Password:    "AC7IBG09A3DTSYM4R41UJWL07VLN8JI7",
+		BaseURL:     "tuner.pandora.com/services/json/",
+		EncryptKey:  "6#26FRL$ZWD",
+		DecryptKey:  "R=U!LH$O2B#",
+		Version:     "5",
+	}
+}
+
 // Client represents a Pandora client.
 //
 // The Client is safe for concurrent use by multiple goroutines. It maintains
@@ -148,9 +165,10 @@ type Client struct {
 
 	// Immutable after construction (no mutex needed for these)
 	description ClientDescription
-	http        *http.Client
-	encrypter   *blowfish.Cipher
-	decrypter   *blowfish.Cipher
+	// http uses the default TLS configuration; no certificate pinning is performed.
+	http      *http.Client
+	encrypter *blowfish.Cipher
+	decrypter *blowfish.Cipher
 
 	// Mutable state (protected by mu)
 	timeOffset       time.Duration
@@ -160,8 +178,21 @@ type Client struct {
 	userID           string
 }
 
-// NewClient creates a new Client with specified ClientDescription.
-func NewClient(d ClientDescription) (*Client, error) {
+// Option configures a Client. Use With* functions to create Options.
+type Option func(*Client)
+
+// WithHTTPClient replaces the default HTTP client entirely.
+func WithHTTPClient(hc *http.Client) Option {
+	return func(c *Client) { c.http = hc }
+}
+
+// WithTimeout sets the timeout on the default HTTP client.
+func WithTimeout(d time.Duration) Option {
+	return func(c *Client) { c.http.Timeout = d }
+}
+
+// NewClient creates a new Client with specified ClientDescription and optional configuration.
+func NewClient(d ClientDescription, opts ...Option) (*Client, error) {
 	client := &http.Client{
 		Timeout: 30 * time.Second, //nolint:mnd // reasonable default timeout
 		Transport: &http.Transport{
@@ -180,12 +211,16 @@ func NewClient(d ClientDescription) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
+	c := &Client{
 		description: d,
 		http:        client,
 		encrypter:   encrypter,
 		decrypter:   decrypter,
-	}, nil
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c, nil
 }
 
 // encrypt encrypts a string using Blowfish in ECB mode.

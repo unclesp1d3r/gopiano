@@ -48,13 +48,25 @@ func TestHTTPLeak(t *testing.T) {
 		}
 	}
 
-	// Allow some time for cleanup
+	// Wait for goroutines to settle using a retry loop instead of a fixed sleep
 	runtime.GC()
-	time.Sleep(100 * time.Millisecond)
-	runtime.GC()
+	var finalGoroutines int
+	const (
+		maxRetries     = 10
+		retryInterval  = 50 * time.Millisecond
+		maxAllowedDiff = 10
+	)
+	for attempt := range maxRetries {
+		runtime.GC()
+		finalGoroutines = runtime.NumGoroutine()
+		if finalGoroutines-initialGoroutines <= maxAllowedDiff {
+			break
+		}
+		if attempt < maxRetries-1 {
+			time.Sleep(retryInterval)
+		}
+	}
 
-	// Check that we haven't leaked goroutines
-	finalGoroutines := runtime.NumGoroutine()
 	goroutineDiff := finalGoroutines - initialGoroutines
 
 	// Allow for some variance in goroutine count, but significant growth indicates a leak

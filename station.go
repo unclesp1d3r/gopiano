@@ -265,6 +265,34 @@ func (c *Client) StationGetGenreStations(ctx context.Context) (*responses.Statio
 	return &resp, nil
 }
 
+// StationGetGenreStationsChecksum retrieves the checksum of the genre stations list.
+// This can be used to determine if the genre stations have changed since the last fetch.
+// Calls API method "station.getGenreStationsChecksum".
+func (c *Client) StationGetGenreStationsChecksum(
+	ctx context.Context,
+) (*responses.StationGetGenreStationsChecksum, error) {
+	userAuthToken, err := c.getUserAuthToken("getting genre stations checksum")
+	if err != nil {
+		return nil, err
+	}
+	requestData := requests.StationGetGenreStationsChecksum{
+		UserAuthToken: userAuthToken,
+		SyncTime:      c.GetSyncTime(),
+	}
+	requestDataEncoded, err := json.Marshal(requestData)
+	if err != nil {
+		return nil, err
+	}
+	requestDataReader := bytes.NewReader(requestDataEncoded)
+
+	var resp responses.StationGetGenreStationsChecksum
+	err = c.BlowfishCall(ctx, "https://", "station.getGenreStationsChecksum", requestDataReader, &resp)
+	if err != nil {
+		return nil, fmt.Errorf("get genre stations checksum: %w", err)
+	}
+	return &resp, nil
+}
+
 // StationGetPlaylist retrieves a playlist for a specified token.
 // Argument stationToken is obtained from UserGetStationList.
 // Note: an error response with code 0 may mean you've called getPlaylist too much.

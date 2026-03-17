@@ -2,58 +2,55 @@ package gopiano
 
 import "testing"
 
-func TestExplainTrack_MissingUserAuthToken(t *testing.T) {
+func TestMiscMethods_MissingUserAuthToken(t *testing.T) {
 	t.Parallel()
 
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+	tests := []struct {
+		name string
+		call func(*testing.T, *Client) error
+	}{
+		{
+			name: "ExplainTrack",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.ExplainTrack(t.Context(), "trackToken123")
+				return err
+			},
+		},
+		{
+			name: "MusicSearch",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.MusicSearch(t.Context(), "search query")
+				return err
+			},
+		},
+		{
+			name: "BookmarkAddArtistBookmark",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.BookmarkAddArtistBookmark(t.Context(), "trackToken123")
+				return err
+			},
+		},
+		{
+			name: "BookmarkAddSongBookmark",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.BookmarkAddSongBookmark(t.Context(), "trackToken123")
+				return err
+			},
+		},
 	}
 
-	_, err = client.ExplainTrack(t.Context(), "trackToken123")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
+			client, err := NewClient(AndroidClient)
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
 
-func TestMusicSearch_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
+			err = tt.call(t, client)
 
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+			assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
+		})
 	}
-
-	_, err = client.MusicSearch(t.Context(), "search query")
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestBookmarkAddArtistBookmark_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	_, err = client.BookmarkAddArtistBookmark(t.Context(), "trackToken123")
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestBookmarkAddSongBookmark_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	_, err = client.BookmarkAddSongBookmark(t.Context(), "trackToken123")
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
 }

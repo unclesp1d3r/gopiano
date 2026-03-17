@@ -2,134 +2,114 @@ package gopiano
 
 import "testing"
 
-func TestUserCreateUser_MissingPartnerAuthToken(t *testing.T) {
+func TestUserMethods_MissingPartnerAuthToken(t *testing.T) {
 	t.Parallel()
 
-	// Create a client without calling AuthPartnerLogin()
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+	tests := []struct {
+		name string
+		call func(*testing.T, *Client) error
+	}{
+		{
+			name: "UserCreateUser",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.UserCreateUser(
+					t.Context(),
+					"user@example.com",
+					"password",
+					"male",
+					"US",
+					90210,
+					1990,
+					false,
+				)
+				return err
+			},
+		},
+		{
+			name: "UserEmailPassword",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				return c.UserEmailPassword(t.Context(), "user@example.com")
+			},
+		},
 	}
 
-	// Attempt to create a user without partner authentication
-	_, err = client.UserCreateUser(
-		t.Context(),
-		"user@example.com",
-		"password",
-		"male",
-		"US",
-		90210,
-		1990,
-		false,
-	)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	// Verify error expectations
-	assertMissingTokenError(t, err, "partner authentication token missing", "AuthPartnerLogin")
+			client, err := NewClient(AndroidClient)
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
+
+			err = tt.call(t, client)
+
+			assertMissingTokenError(t, err, "partner authentication token missing", "AuthPartnerLogin")
+		})
+	}
 }
 
-func TestUserEmailPassword_MissingPartnerAuthToken(t *testing.T) {
+func TestUserMethods_MissingUserAuthToken(t *testing.T) {
 	t.Parallel()
 
-	// Create a client without calling AuthPartnerLogin()
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+	tests := []struct {
+		name string
+		call func(*testing.T, *Client) error
+	}{
+		{
+			name: "UserCanSubscribe",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.UserCanSubscribe(t.Context())
+				return err
+			},
+		},
+		{
+			name: "UserGetBookmarks",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.UserGetBookmarks(t.Context())
+				return err
+			},
+		},
+		{
+			name: "UserGetStationList",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.UserGetStationList(t.Context(), false)
+				return err
+			},
+		},
+		{
+			name: "UserGetStationListChecksum",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				_, err := c.UserGetStationListChecksum(t.Context())
+				return err
+			},
+		},
+		{
+			name: "UserSetQuickMix",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				return c.UserSetQuickMix(t.Context(), []string{"station1"})
+			},
+		},
+		{
+			name: "UserSleepSong",
+			call: func(t *testing.T, c *Client) error { //nolint:thelper // table-driven test closure, not a helper
+				return c.UserSleepSong(t.Context(), "trackToken123")
+			},
+		},
 	}
 
-	// Attempt to resend registration email without partner authentication
-	err = client.UserEmailPassword(t.Context(), "user@example.com")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	// Verify error expectations
-	assertMissingTokenError(t, err, "partner authentication token missing", "AuthPartnerLogin")
-}
+			client, err := NewClient(AndroidClient)
+			if err != nil {
+				t.Fatalf("Failed to create client: %v", err)
+			}
 
-func TestUserCanSubscribe_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
+			err = tt.call(t, client)
 
-	// Create a client and authenticate partner but not user
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
+			assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
+		})
 	}
-
-	// Note: We can't actually call AuthPartnerLogin() in a unit test without network,
-	// but we can test the validation logic by checking the error when userAuthToken is empty
-	// For this test, we'll simulate having partner auth but not user auth
-	// by creating a client and not calling AuthUserLogin() or UserCreateUser()
-
-	// Attempt to check subscription status without user authentication
-	_, err = client.UserCanSubscribe(t.Context())
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestUserGetBookmarks_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	_, err = client.UserGetBookmarks(t.Context())
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestUserGetStationList_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	_, err = client.UserGetStationList(t.Context(), false)
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestUserGetStationListChecksum_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	_, err = client.UserGetStationListChecksum(t.Context())
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestUserSetQuickMix_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	err = client.UserSetQuickMix(t.Context(), []string{"station1"})
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
-}
-
-func TestUserSleepSong_MissingUserAuthToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := NewClient(AndroidClient)
-	if err != nil {
-		t.Fatalf("Failed to create client: %v", err)
-	}
-
-	err = client.UserSleepSong(t.Context(), "trackToken123")
-
-	// Verify error expectations
-	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
 }
