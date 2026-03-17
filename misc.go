@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
@@ -17,6 +18,9 @@ func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*response
 	userAuthToken, err := c.getUserAuthToken("explaining track")
 	if err != nil {
 		return nil, err
+	}
+	if trackToken == "" {
+		return nil, errors.New("trackToken is required")
 	}
 	requestData := requests.ExplainTrack{
 		TrackToken:    trackToken,
@@ -43,6 +47,9 @@ func (c *Client) MusicSearch(ctx context.Context, searchText string) (*responses
 	userAuthToken, err := c.getUserAuthToken("searching music")
 	if err != nil {
 		return nil, err
+	}
+	if searchText == "" {
+		return nil, errors.New("searchText is required")
 	}
 	requestData := requests.MusicSearch{
 		SearchText:    searchText,
@@ -74,6 +81,9 @@ func (c *Client) BookmarkAddArtistBookmark(
 	if err != nil {
 		return nil, err
 	}
+	if trackToken == "" {
+		return nil, errors.New("trackToken is required")
+	}
 	requestData := requests.BookmarkAddArtistBookmark{
 		TrackToken:    trackToken,
 		UserAuthToken: userAuthToken,
@@ -103,6 +113,9 @@ func (c *Client) BookmarkAddSongBookmark(
 	userAuthToken, err := c.getUserAuthToken("bookmarking song")
 	if err != nil {
 		return nil, err
+	}
+	if trackToken == "" {
+		return nil, errors.New("trackToken is required")
 	}
 	requestData := requests.BookmarkAddSongBookmark{
 		TrackToken:    trackToken,

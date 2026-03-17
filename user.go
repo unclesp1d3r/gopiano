@@ -228,6 +228,9 @@ func (c *Client) UserSetQuickMix(ctx context.Context, stationIDs []string) error
 	if err != nil {
 		return err
 	}
+	if len(stationIDs) == 0 {
+		return errors.New("stationIDs is required")
+	}
 	requestData := requests.UserSetQuickMix{
 		QuickMixStationIDs: stationIDs,
 		UserAuthToken:      userAuthToken,
@@ -251,6 +254,9 @@ func (c *Client) UserSleepSong(ctx context.Context, trackToken string) error {
 	userAuthToken, err := c.getUserAuthToken("sleeping a song")
 	if err != nil {
 		return err
+	}
+	if trackToken == "" {
+		return errors.New("trackToken is required")
 	}
 	requestData := requests.UserSleepSong{
 		TrackToken:    trackToken,

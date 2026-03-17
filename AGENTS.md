@@ -145,7 +145,7 @@ When adding a new Pandora API method:
 
    ```go
    // MethodName does X. Calls API method "api.methodName".
-   func (c *Client) MethodName(...) (*responses.MethodName, error) {
+   func (c *Client) MethodName(ctx context.Context, ...) (*responses.MethodName, error) {
        requestData := requests.MethodName{
            // ... populate fields
            SyncTime: c.GetSyncTime(), // For authenticated calls
@@ -158,7 +158,7 @@ When adding a new Pandora API method:
 
        var resp responses.MethodName
        // Use BlowfishCall for encrypted requests, PandoraCall for plain
-       err = c.BlowfishCall("http://", "api.methodName", requestDataReader, &resp)
+       err = c.BlowfishCall(ctx, "https://", "api.methodName", requestDataReader, &resp)
        if err != nil {
            return nil, err
        }
@@ -213,7 +213,7 @@ When adding a new Pandora API method:
 
 - **Long-running functions**: Accept `context.Context` as first parameter
 - **Respect deadlines**: Check context cancellation and deadlines
-- **Current limitation**: `PandoraCall` uses `context.Background()` - consider making it configurable
+- **Context support**: `PandoraCall` and `BlowfishCall` accept `context.Context` as their first parameter for cancellation and deadlines
 
 ### Concurrency
 

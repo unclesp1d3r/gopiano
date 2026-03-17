@@ -181,9 +181,13 @@ func NewClient(d ClientDescription) (*Client, error) {
 	}, nil
 }
 
-// Blowfish encrypts a string in ECB mode.
+// encrypt encrypts a string using Blowfish in ECB mode.
 // Many methods of the Pandora API take their JSON data as Blowfish encrypted data.
 // The key for the encryption is provided by the ClientDescription.
+//
+// SECURITY: ECB mode is weak because identical plaintext blocks produce identical
+// ciphertext blocks, enabling pattern analysis. This is a Pandora API protocol
+// requirement, not a design choice.
 func (c *Client) encrypt(data string) string {
 	if data == "" {
 		return ""
@@ -204,9 +208,13 @@ func (c *Client) encrypt(data string) string {
 	return result.String()
 }
 
-// Blowfish decrypts a string in ECB mode.
+// decrypt decrypts a string using Blowfish in ECB mode.
 // Some data returned from the Pandora API is encrypted. This decrypts it.
 // The key for the decryption is provided by the ClientDescription.
+//
+// SECURITY: ECB mode is weak because identical plaintext blocks produce identical
+// ciphertext blocks, enabling pattern analysis. This is a Pandora API protocol
+// requirement, not a design choice.
 func (c *Client) decrypt(data string) (string, error) {
 	if data == "" {
 		return "", nil
@@ -237,6 +245,9 @@ func (c *Client) decrypt(data string) (string, error) {
 // the "method" url argument and specifies the remote procedure to call, body is an io.Reader
 // to be passed directly into http.Post, and data is to be passed to json.Unmarshal to parse
 // the JSON response.
+//
+// SECURITY: Using "http://" transmits data in plaintext, including auth tokens in URL
+// query parameters. Always use "https://" to protect credentials in transit.
 func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body io.Reader, data any) error {
 	// Check for context cancellation before starting
 	select {
@@ -317,6 +328,9 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 
 // BlowfishCall first encrypts the body before calling PandoraCall.
 // Arguments are identical to PandoraCall.
+//
+// SECURITY: Using "http://" transmits data in plaintext, including auth tokens in URL
+// query parameters. Always use "https://" to protect credentials in transit.
 func (c *Client) BlowfishCall(ctx context.Context, protocol, method string, body io.Reader, data any) error {
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {

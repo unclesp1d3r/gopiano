@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/unclesp1d3r/gopiano/requests"
@@ -22,6 +23,9 @@ func (c *Client) StationAddFeedback(
 	userAuthToken, err := c.getUserAuthToken("adding feedback")
 	if err != nil {
 		return nil, err
+	}
+	if trackToken == "" {
+		return nil, errors.New("trackToken is required")
 	}
 	requestData := requests.StationAddFeedback{
 		TrackToken:    trackToken,
@@ -55,6 +59,12 @@ func (c *Client) StationAddMusic(
 	if err != nil {
 		return nil, err
 	}
+	if musicToken == "" {
+		return nil, errors.New("musicToken is required")
+	}
+	if stationToken == "" {
+		return nil, errors.New("stationToken is required")
+	}
 	requestData := requests.StationAddMusic{
 		MusicToken:    musicToken,
 		StationToken:  stationToken,
@@ -87,6 +97,15 @@ func (c *Client) StationCreateStationTrack(
 	if err != nil {
 		return nil, err
 	}
+	if trackToken == "" {
+		return nil, errors.New("trackToken is required")
+	}
+	if musicType == "" {
+		return nil, errors.New("musicType is required")
+	}
+	if musicType != "song" && musicType != "artist" {
+		return nil, fmt.Errorf("musicType must be 'song' or 'artist', got: %s", musicType)
+	}
 	requestData := requests.StationCreateStation{
 		TrackToken:    trackToken,
 		MusicType:     musicType,
@@ -118,6 +137,9 @@ func (c *Client) StationCreateStationMusic(
 	if err != nil {
 		return nil, err
 	}
+	if musicToken == "" {
+		return nil, errors.New("musicToken is required")
+	}
 	requestData := requests.StationCreateStation{
 		MusicToken:    musicToken,
 		UserAuthToken: userAuthToken,
@@ -144,6 +166,9 @@ func (c *Client) StationDeleteFeedback(ctx context.Context, feedbackID string) e
 	if err != nil {
 		return err
 	}
+	if feedbackID == "" {
+		return errors.New("feedbackID is required")
+	}
 	requestData := requests.StationDeleteFeedback{
 		FeedbackID:    feedbackID,
 		UserAuthToken: userAuthToken,
@@ -168,6 +193,9 @@ func (c *Client) StationDeleteMusic(ctx context.Context, seedID string) error {
 	if err != nil {
 		return err
 	}
+	if seedID == "" {
+		return errors.New("seedID is required")
+	}
 	requestData := requests.StationDeleteMusic{
 		SeedID:        seedID,
 		UserAuthToken: userAuthToken,
@@ -191,6 +219,9 @@ func (c *Client) StationDeleteStation(ctx context.Context, stationToken string) 
 	userAuthToken, err := c.getUserAuthToken("deleting station")
 	if err != nil {
 		return err
+	}
+	if stationToken == "" {
+		return errors.New("stationToken is required")
 	}
 	requestData := requests.StationDeleteStation{
 		StationToken:  stationToken,
@@ -243,6 +274,9 @@ func (c *Client) StationGetPlaylist(ctx context.Context, stationToken string) (*
 	if err != nil {
 		return nil, err
 	}
+	if stationToken == "" {
+		return nil, errors.New("stationToken is required")
+	}
 	requestData := requests.StationGetPlaylist{
 		StationToken:  stationToken,
 		UserAuthToken: userAuthToken,
@@ -274,6 +308,9 @@ func (c *Client) StationGetStation(
 	userAuthToken, err := c.getUserAuthToken("getting station")
 	if err != nil {
 		return nil, err
+	}
+	if stationToken == "" {
+		return nil, errors.New("stationToken is required")
 	}
 	requestData := requests.StationGetStation{
 		StationToken:              stationToken,
@@ -308,6 +345,15 @@ func (c *Client) StationShareStation(
 	if err != nil {
 		return err
 	}
+	if stationID == "" {
+		return errors.New("stationID is required")
+	}
+	if stationToken == "" {
+		return errors.New("stationToken is required")
+	}
+	if len(emails) == 0 {
+		return errors.New("emails is required")
+	}
 	requestData := requests.StationShareStation{
 		StationToken:  stationToken,
 		StationID:     stationID,
@@ -338,6 +384,12 @@ func (c *Client) StationRenameStation(
 	if err != nil {
 		return nil, err
 	}
+	if stationToken == "" {
+		return nil, errors.New("stationToken is required")
+	}
+	if stationName == "" {
+		return nil, errors.New("stationName is required")
+	}
 	requestData := requests.StationRenameStation{
 		StationToken:  stationToken,
 		StationName:   stationName,
@@ -367,6 +419,9 @@ func (c *Client) StationTransformSharedStation(
 	userAuthToken, err := c.getUserAuthToken("transforming shared station")
 	if err != nil {
 		return nil, err
+	}
+	if stationToken == "" {
+		return nil, errors.New("stationToken is required")
 	}
 	requestData := requests.StationTransformSharedStation{
 		StationToken:  stationToken,
