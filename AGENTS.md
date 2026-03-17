@@ -350,3 +350,7 @@ just test-coverage-func      # Show function-level coverage
 ```
 
 See the `justfile` for all available recipes. Run `just` without arguments to see the full list.
+
+## Agent Rules <!-- tessl-managed -->
+
+@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)
