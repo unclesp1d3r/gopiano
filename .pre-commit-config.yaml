@@ -15,6 +15,7 @@ repos:
       - id: check-yaml
         args: [--unsafe]
       - id: check-xml
+        exclude: ^internal/cfgparser/testdata/
       - id: mixed-line-ending
         args: [--fix=auto]
       - id: check-docstring-first
@@ -35,6 +36,7 @@ repos:
     rev: 1.0.0
     hooks:
       - id: mdformat
+        exclude: \.golden\.md$
         additional_dependencies:
           - mdformat-gfm
           - mdformat-admon
@@ -47,3 +49,21 @@ repos:
           - mdformat-toc
           - mdformat-front-matters
         types: [markdown]
+
+  # Commit message linting via commitlint
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.23.0
+    hooks:
+      - id: commitlint
+        name: commitlint
+        entry: npx commitlint --edit
+        language: node
+        stages: [commit-msg]
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.4
+    hooks:
+      - id: go-build-mod
+      - id: go-mod-tidy-repo
+      - id: go-test-mod
+      - id: golangci-lint-mod
