@@ -132,7 +132,6 @@ linters:
       check-type-assertions: true
       check-blank: true
       exclude-functions:
-        - io/ioutil.ReadFile
         - io.Copy(*bytes.Buffer)
         - io.Copy(os.Stdout)
     exhaustive:

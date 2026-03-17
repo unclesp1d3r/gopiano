@@ -58,6 +58,10 @@ const (
 
 // ErrorCodeMap maps Pandora API error codes to their string names.
 //
+// Note: Some names contain intentional typos preserved from the Pandora API, including
+// MAINTENCANCE_MODE (code 1), URL_PARAM_MISING_PARTNER_ID (code 4), and
+// PARAMATER_TYPE_MISMATCH (code 8). These must not be corrected.
+//
 // Error code 0 (INTERNAL) is a generic error that often indicates authentication issues,
 // invalid parameters, or rate limiting. Error codes in the 1000+ range are more specific
 // and actionable. When receiving error code 0, check authentication flow and parameter
@@ -155,6 +159,8 @@ type DateResponse struct {
 }
 
 // GetDate converts the DateResponse to a time.Time object.
+// The 1900+Year offset follows Java's deprecated Date.getYear() convention,
+// which returns year minus 1900. The Pandora API uses this Java convention.
 func (d DateResponse) GetDate() time.Time {
 	return time.Date(1900+d.Year, time.Month(d.Month), d.Date, d.Hours, d.Minutes, d.Seconds,
 		d.Nanos, time.FixedZone("Local Time", d.TimezoneOffset*60)) //nolint:mnd // 60 seconds per minute
@@ -177,7 +183,7 @@ type AuthPartnerLogin struct {
 		Urls struct {
 			AutoComplete string `json:"autoComplete"`
 		} `json:"urls"`
-	}
+	} `json:"result"`
 }
 
 // AuthUserLogin represents the response from auth.userLogin.
@@ -289,10 +295,12 @@ func (s StationList) Len() int {
 	return len(s)
 }
 
+// Swap swaps the stations at indices i and j.
 func (s StationList) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
+// Less reports whether the station at index i sorts before index j by station name.
 func (s StationList) Less(i, j int) bool {
 	return s[i].StationName < s[j].StationName
 }

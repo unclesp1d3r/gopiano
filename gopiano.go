@@ -104,13 +104,20 @@ var emailRegex = regexp.MustCompile(
 
 // ClientDescription describes a particular type of client to emulate.
 type ClientDescription struct {
+	// DeviceModel is the device identifier sent to the Pandora API (e.g., "android-generic").
 	DeviceModel string
-	Username    string
-	Password    string
-	BaseURL     string
-	EncryptKey  string
-	DecryptKey  string
-	Version     string
+	// Username is the partner-level username used during partner authentication.
+	Username string
+	// Password is the partner-level password used during partner authentication.
+	Password string
+	// BaseURL is the base URL for the Pandora API (e.g., "tuner.pandora.com/services/json/").
+	BaseURL string
+	// EncryptKey is the Blowfish key used to encrypt outgoing request payloads.
+	EncryptKey string
+	// DecryptKey is the Blowfish key used to decrypt incoming response payloads (e.g., syncTime).
+	DecryptKey string
+	// Version is the Pandora API protocol version (e.g., "5").
+	Version string
 }
 
 // AndroidClient is the data for the Android client.
@@ -256,6 +263,9 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	default:
 	}
 
+	// Auth tokens are passed as URL query parameters because the Pandora API
+	// protocol requires them there (the encrypted request body carries payload
+	// data, not authentication). Always use "https://" so tokens are protected.
 	urlArgs := url.Values{
 		"method": {method},
 	}

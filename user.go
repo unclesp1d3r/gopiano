@@ -96,6 +96,7 @@ func (c *Client) UserCreateUser(
 	requestDataEncoded, err := json.Marshal( //nolint:gosec // G117: password is encrypted via BlowfishCall + HTTPS
 		requestData,
 	)
+	requestData.Password = "" // Zero password from memory after marshaling
 	if err != nil {
 		return nil, err
 	}

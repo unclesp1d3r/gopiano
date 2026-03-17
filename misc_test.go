@@ -1,9 +1,6 @@
 package gopiano
 
-import (
-	"context"
-	"testing"
-)
+import "testing"
 
 func TestExplainTrack_MissingUserAuthToken(t *testing.T) {
 	t.Parallel()
@@ -13,7 +10,7 @@ func TestExplainTrack_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.ExplainTrack(context.Background(), "trackToken123")
+	_, err = client.ExplainTrack(t.Context(), "trackToken123")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -27,7 +24,7 @@ func TestMusicSearch_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.MusicSearch(context.Background(), "search query")
+	_, err = client.MusicSearch(t.Context(), "search query")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -41,7 +38,7 @@ func TestBookmarkAddArtistBookmark_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.BookmarkAddArtistBookmark(context.Background(), "trackToken123")
+	_, err = client.BookmarkAddArtistBookmark(t.Context(), "trackToken123")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")
@@ -55,7 +52,7 @@ func TestBookmarkAddSongBookmark_MissingUserAuthToken(t *testing.T) {
 		t.Fatalf("Failed to create client: %v", err)
 	}
 
-	_, err = client.BookmarkAddSongBookmark(context.Background(), "trackToken123")
+	_, err = client.BookmarkAddSongBookmark(t.Context(), "trackToken123")
 
 	// Verify error expectations
 	assertMissingTokenError(t, err, "user authentication token missing", "AuthUserLogin")

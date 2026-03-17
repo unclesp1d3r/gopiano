@@ -1,7 +1,6 @@
 package gopiano
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -41,8 +40,8 @@ func TestHTTPLeak(t *testing.T) {
 	// Make multiple HTTP calls to test for resource leaks
 	const numCalls = 50
 	for i := range numCalls {
-		var result interface{}
-		err := client.PandoraCall(context.Background(), "http://", "test.method", strings.NewReader("{}"), &result)
+		var result any
+		err := client.PandoraCall(t.Context(), "http://", "test.method", strings.NewReader("{}"), &result)
 		if err != nil {
 			t.Logf("Call %d failed (expected for test): %v", i, err)
 			// This is expected to fail due to the mock response, but we're testing resource cleanup
@@ -104,8 +103,8 @@ func TestHTTPBodyCloseDirectly(t *testing.T) {
 	}
 
 	// Test a simple call that should succeed
-	var result interface{}
-	err = client.PandoraCall(context.Background(), "http://", "test.method", strings.NewReader("{}"), &result)
+	var result any
+	err = client.PandoraCall(t.Context(), "http://", "test.method", strings.NewReader("{}"), &result)
 	// We expect this to work with our mock server
 	if err != nil {
 		t.Logf("Call completed with: %v", err)
