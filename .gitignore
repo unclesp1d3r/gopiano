@@ -172,3 +172,14 @@ cosign.bundle
 snyk.sarif
 snyk-code.sarif
 results.sarif
+
+# AI assistant artifacts
+.claude.local.md
+.full-review
+docs/plans
+.cursor/commands
+.github/prompts
+.kiro/specs/*
+.worktrees/
+
+
