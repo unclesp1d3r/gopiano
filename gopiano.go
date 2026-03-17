@@ -119,7 +119,7 @@ type ClientDescription struct {
 // not user credentials. They are publicly documented and required for API communication.
 // User credentials (email/password) are transmitted separately and securely over HTTPS.
 // These keys are used for Blowfish encryption of request payloads as required by the API protocol.
-var AndroidClient = ClientDescription{ //nolint:gochecknoglobals // exported by design
+var AndroidClient = ClientDescription{ //nolint:gochecknoglobals,gosec // exported by design; partner credentials are public, not user secrets
 	DeviceModel: "android-generic",
 	Username:    "android",
 	Password:    "AC7IBG09A3DTSYM4R41UJWL07VLN8JI7",
@@ -155,7 +155,16 @@ type Client struct {
 
 // NewClient creates a new Client with specified ClientDescription.
 func NewClient(d ClientDescription) (*Client, error) {
-	client := new(http.Client)
+	client := &http.Client{
+		Timeout: 30 * time.Second, //nolint:mnd // reasonable default timeout
+		Transport: &http.Transport{
+			TLSHandshakeTimeout:   10 * time.Second, //nolint:mnd // reasonable TLS timeout
+			ResponseHeaderTimeout: 15 * time.Second, //nolint:mnd // reasonable header timeout
+			IdleConnTimeout:       90 * time.Second, //nolint:mnd // standard idle timeout
+			MaxIdleConns:          10,               //nolint:mnd // reasonable pool size
+			MaxIdleConnsPerHost:   10,               //nolint:mnd // single host API
+		},
+	}
 	encrypter, err := blowfish.NewCipher([]byte(d.EncryptKey))
 	if err != nil {
 		return nil, err
@@ -275,7 +284,8 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	defer resp.Body.Close()
 
 	var errResp responses.PandoraError
-	responseBody, err := io.ReadAll(resp.Body)
+	const maxResponseSize = 1 << 20 // 1 MB
+	responseBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize))
 	if err != nil {
 		return err
 	}
@@ -295,7 +305,7 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 				errResp.Message = errResp.Message + ". " + guidance
 			}
 		}
-		return errResp
+		return &errResp
 	}
 
 	err = json.Unmarshal(responseBody, &data)
@@ -334,30 +344,30 @@ func validateEmail(email string) error {
 	return nil
 }
 
-// validatePartnerAuthToken checks if partnerAuthToken is set and returns an error if missing.
+// getPartnerAuthToken returns the partner auth token under the read lock, or an error if missing.
 // This is used by methods that require partner authentication (e.g., AuthUserLogin, UserCreateUser).
-func (c *Client) validatePartnerAuthToken(operation string) error {
+func (c *Client) getPartnerAuthToken(operation string) (string, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.partnerAuthToken == "" {
-		return fmt.Errorf(
+		return "", fmt.Errorf(
 			"partner authentication token missing: must call AuthPartnerLogin() first to establish a partner session before %s",
 			operation,
 		)
 	}
-	return nil
+	return c.partnerAuthToken, nil
 }
 
-// validateUserAuthToken checks if userAuthToken is set and returns an error if missing.
+// getUserAuthToken returns the user auth token under the read lock, or an error if missing.
 // This is used by methods that require user authentication (e.g., UserGetStationList, StationGetPlaylist).
-func (c *Client) validateUserAuthToken(operation string) error {
+func (c *Client) getUserAuthToken(operation string) (string, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.userAuthToken == "" {
-		return fmt.Errorf(
+		return "", fmt.Errorf(
 			"user authentication token missing: must call AuthUserLogin() or UserCreateUser() first to establish a user session before %s",
 			operation,
 		)
 	}
-	return nil
+	return c.userAuthToken, nil
 }

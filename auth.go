@@ -30,7 +30,9 @@ func (c *Client) AuthPartnerLogin(ctx context.Context) (*responses.AuthPartnerLo
 		DeviceModel: c.description.DeviceModel,
 		IncludeURLs: true,
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
+	requestDataEncoded, err := json.Marshal( //nolint:gosec // G117: partner credentials are public, not user secrets
+		requestData,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +46,10 @@ func (c *Client) AuthPartnerLogin(ctx context.Context) (*responses.AuthPartnerLo
 	syncTime, err := c.decrypt(resp.Result.SyncTime)
 	if err != nil {
 		return nil, err
+	}
+	const minSyncTimeLen = 14
+	if len(syncTime) < minSyncTimeLen {
+		return nil, fmt.Errorf("auth partner login: sync time too short: got %d chars, need at least 14", len(syncTime))
 	}
 	resp.Result.SyncTime = syncTime[4:14]
 	i, err := strconv.ParseInt(resp.Result.SyncTime, 10, 32)
@@ -73,17 +79,20 @@ func (c *Client) AuthUserLogin(ctx context.Context, username, password string) (
 	if password == "" {
 		return nil, errors.New("password is required")
 	}
-	if err := c.validatePartnerAuthToken("logging in a user"); err != nil {
+	partnerAuthToken, err := c.getPartnerAuthToken("logging in a user")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.AuthUserLogin{
-		PartnerAuthToken: c.partnerAuthToken,
+		PartnerAuthToken: partnerAuthToken,
 		LoginType:        "user",
 		Username:         username,
 		Password:         password,
 		SyncTime:         c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
+	requestDataEncoded, err := json.Marshal( //nolint:gosec // G117: password is encrypted via BlowfishCall + HTTPS
+		requestData,
+	)
 	if err != nil {
 		return nil, err
 	}

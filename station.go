@@ -19,13 +19,14 @@ func (c *Client) StationAddFeedback(
 	trackToken string,
 	isPositive bool,
 ) (*responses.StationAddFeedback, error) {
-	if err := c.validateUserAuthToken("adding feedback"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("adding feedback")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationAddFeedback{
 		TrackToken:    trackToken,
 		IsPositive:    isPositive,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -50,13 +51,14 @@ func (c *Client) StationAddMusic(
 	ctx context.Context,
 	musicToken, stationToken string,
 ) (*responses.StationAddMusic, error) {
-	if err := c.validateUserAuthToken("adding music"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("adding music")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationAddMusic{
 		MusicToken:    musicToken,
 		StationToken:  stationToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -81,13 +83,14 @@ func (c *Client) StationCreateStationTrack(
 	ctx context.Context,
 	trackToken, musicType string,
 ) (*responses.StationCreateStation, error) {
-	if err := c.validateUserAuthToken("creating station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("creating station")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationCreateStation{
 		TrackToken:    trackToken,
 		MusicType:     musicType,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -111,12 +114,13 @@ func (c *Client) StationCreateStationMusic(
 	ctx context.Context,
 	musicToken string,
 ) (*responses.StationCreateStation, error) {
-	if err := c.validateUserAuthToken("creating station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("creating station")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationCreateStation{
 		MusicToken:    musicToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -136,12 +140,13 @@ func (c *Client) StationCreateStationMusic(
 // StationDeleteFeedback deletes feedback (thumbs up/down) on a track's feedback ID.
 // Calls API method "station.deleteFeedback".
 func (c *Client) StationDeleteFeedback(ctx context.Context, feedbackID string) error {
-	if err := c.validateUserAuthToken("deleting feedback"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("deleting feedback")
+	if err != nil {
 		return err
 	}
 	requestData := requests.StationDeleteFeedback{
 		FeedbackID:    feedbackID,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -159,12 +164,13 @@ func (c *Client) StationDeleteFeedback(ctx context.Context, feedbackID string) e
 // StationDeleteMusic removes seed music identified by a seedID from a station.
 // Calls API method "station.deleteMusic".
 func (c *Client) StationDeleteMusic(ctx context.Context, seedID string) error {
-	if err := c.validateUserAuthToken("deleting music"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("deleting music")
+	if err != nil {
 		return err
 	}
 	requestData := requests.StationDeleteMusic{
 		SeedID:        seedID,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -182,12 +188,13 @@ func (c *Client) StationDeleteMusic(ctx context.Context, seedID string) error {
 // StationDeleteStation removes a station identified by a stationToken.
 // Calls API method "station.deleteStation".
 func (c *Client) StationDeleteStation(ctx context.Context, stationToken string) error {
-	if err := c.validateUserAuthToken("deleting station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("deleting station")
+	if err != nil {
 		return err
 	}
 	requestData := requests.StationDeleteStation{
 		StationToken:  stationToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -205,11 +212,12 @@ func (c *Client) StationDeleteStation(ctx context.Context, stationToken string) 
 // StationGetGenreStations retrieves a list of predefined "genre stations".
 // Calls API method "station.getGenreStations".
 func (c *Client) StationGetGenreStations(ctx context.Context) (*responses.StationGetGenreStations, error) {
-	if err := c.validateUserAuthToken("getting genre stations"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("getting genre stations")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationGetGenreStations{
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -231,12 +239,13 @@ func (c *Client) StationGetGenreStations(ctx context.Context) (*responses.Statio
 // Note: an error response with code 0 may mean you've called getPlaylist too much.
 // Calls API method "station.getPlaylist".
 func (c *Client) StationGetPlaylist(ctx context.Context, stationToken string) (*responses.StationGetPlaylist, error) {
-	if err := c.validateUserAuthToken("getting playlist"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("getting playlist")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationGetPlaylist{
 		StationToken:  stationToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -248,7 +257,7 @@ func (c *Client) StationGetPlaylist(ctx context.Context, stationToken string) (*
 	var resp responses.StationGetPlaylist
 	err = c.BlowfishCall(ctx, "https://", "station.getPlaylist", requestDataReader, &resp)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get playlist: %w", err)
 	}
 	return &resp, nil
 }
@@ -262,13 +271,14 @@ func (c *Client) StationGetStation(
 	stationToken string,
 	includeExtendedAttributes bool,
 ) (*responses.StationGetStation, error) {
-	if err := c.validateUserAuthToken("getting station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("getting station")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationGetStation{
 		StationToken:              stationToken,
 		IncludeExtendedAttributes: includeExtendedAttributes,
-		UserAuthToken:             c.userAuthToken,
+		UserAuthToken:             userAuthToken,
 		SyncTime:                  c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -294,14 +304,15 @@ func (c *Client) StationShareStation(
 	stationID, stationToken string,
 	emails []string,
 ) error {
-	if err := c.validateUserAuthToken("sharing station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("sharing station")
+	if err != nil {
 		return err
 	}
 	requestData := requests.StationShareStation{
 		StationToken:  stationToken,
 		StationID:     stationID,
 		Emails:        emails,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -323,13 +334,14 @@ func (c *Client) StationRenameStation(
 	ctx context.Context,
 	stationToken, stationName string,
 ) (*responses.StationRenameStation, error) {
-	if err := c.validateUserAuthToken("renaming station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("renaming station")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationRenameStation{
 		StationToken:  stationToken,
 		StationName:   stationName,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -352,12 +364,13 @@ func (c *Client) StationTransformSharedStation(
 	ctx context.Context,
 	stationToken string,
 ) (*responses.StationTransformSharedStation, error) {
-	if err := c.validateUserAuthToken("transforming shared station"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("transforming shared station")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.StationTransformSharedStation{
 		StationToken:  stationToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)

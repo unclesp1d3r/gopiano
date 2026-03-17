@@ -116,7 +116,8 @@ type PandoraError struct {
 	Message string `json:"message"`
 }
 
-func (e PandoraError) Error() string {
+// Error returns a string representation of the Pandora API error.
+func (e *PandoraError) Error() string {
 	return fmt.Sprintf("Pandora Error: %d %s", e.Code, e.Message)
 }
 

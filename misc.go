@@ -14,12 +14,13 @@ import (
 // Music Genome Project.
 // Calls API method "track.explainTrack".
 func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*responses.ExplainTrack, error) {
-	if err := c.validateUserAuthToken("explaining track"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("explaining track")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.ExplainTrack{
 		TrackToken:    trackToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -39,12 +40,13 @@ func (c *Client) ExplainTrack(ctx context.Context, trackToken string) (*response
 // MusicSearch searches for music, which can be used to create a new or add seeds to a station.
 // Calls API method "music.search".
 func (c *Client) MusicSearch(ctx context.Context, searchText string) (*responses.MusicSearch, error) {
-	if err := c.validateUserAuthToken("searching music"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("searching music")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.MusicSearch{
 		SearchText:    searchText,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -68,12 +70,13 @@ func (c *Client) BookmarkAddArtistBookmark(
 	ctx context.Context,
 	trackToken string,
 ) (*responses.BookmarkAddArtistBookmark, error) {
-	if err := c.validateUserAuthToken("bookmarking artist"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("bookmarking artist")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.BookmarkAddArtistBookmark{
 		TrackToken:    trackToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)
@@ -97,12 +100,13 @@ func (c *Client) BookmarkAddSongBookmark(
 	ctx context.Context,
 	trackToken string,
 ) (*responses.BookmarkAddSongBookmark, error) {
-	if err := c.validateUserAuthToken("bookmarking song"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("bookmarking song")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.BookmarkAddSongBookmark{
 		TrackToken:    trackToken,
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
 	requestDataEncoded, err := json.Marshal(requestData)

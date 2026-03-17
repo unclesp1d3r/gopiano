@@ -53,6 +53,7 @@ Only after both steps can you call other API methods that require user authentic
 package main
 
 import (
+ "context"
  "log"
 
  "github.com/unclesp1d3r/gopiano"
@@ -66,19 +67,19 @@ func main() {
  }
 
  // Step 1: Partner login (REQUIRED FIRST)
- _, err = client.AuthPartnerLogin()
+ _, err = client.AuthPartnerLogin(context.Background())
  if err != nil {
   log.Fatal(err)
  }
 
  // Step 2: User login (for existing users)
- _, err = client.AuthUserLogin("user@example.com", "password")
+ _, err = client.AuthUserLogin(context.Background(), "user@example.com", "password")
  if err != nil {
   log.Fatal(err)
  }
 
  // Now you can call other methods
- stations, err := client.UserGetStationList(false)
+ stations, err := client.UserGetStationList(context.Background(), false)
  if err != nil {
   log.Fatal(err)
  }
@@ -105,6 +106,7 @@ The `UserCreateUser` function allows you to create new Pandora user accounts. Th
 package main
 
 import (
+ "context"
  "log"
 
  "github.com/unclesp1d3r/gopiano"
@@ -117,13 +119,13 @@ func main() {
  }
 
  // Step 1: Partner login (REQUIRED)
- _, err = client.AuthPartnerLogin()
+ _, err = client.AuthPartnerLogin(context.Background())
  if err != nil {
   log.Fatalf("Partner login failed: %v", err)
  }
 
  // Step 2: Create new user
- userResp, err := client.UserCreateUser(
+ userResp, err := client.UserCreateUser(context.Background(),
   "user@example.com",  // username: must be valid email
   "SecurePassword123",  // password
   "male",               // gender: must be "male" or "female"
