@@ -70,17 +70,26 @@ The library uses Blowfish ECB (Electronic Codebook) mode encryption for API comm
 
 ### API Interaction Patterns
 
-The library provides two main methods for API interaction:
+The library provides two public methods and two internal generic helpers for API interaction:
 
 - **`PandoraCall()`**: Basic HTTP POST method for unencrypted API calls. Handles URL construction, authentication tokens, and response parsing.
 - **`BlowfishCall()`**: Wrapper around `PandoraCall()` that first encrypts the request body using Blowfish encryption before sending.
+- **`blowfishCallJSON[Resp]()`**: Internal generic helper that marshals, encrypts, calls, and unmarshals in one step. Used by most API methods.
+- **`blowfishCallVoid()`**: Internal helper for API methods that return only an error with no response body.
 
-Both methods handle:
+These methods handle:
 
 - URL construction with query parameters (method, partner_id, user_id, auth_token)
 - HTTP request creation with proper headers (User-Agent: "gopiano", Content-Type: "text/plain")
 - Response parsing and error handling
-- Pandora API error detection and conversion to `PandoraError` types
+- Pandora API error detection and conversion to `*PandoraError` types
+
+### Functional Options
+
+`NewClient` accepts optional `Option` arguments:
+
+- `WithHTTPClient(hc)` - Replace the default HTTP client
+- `WithTimeout(d)` - Set timeout on the default HTTP client
 
 ### Error Handling
 
