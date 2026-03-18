@@ -321,6 +321,36 @@ The project is actively being improved with ongoing work on:
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help improve the project.
 
+## Breaking Changes
+
+### PandoraError Pointer Semantics
+
+`PandoraError` now uses pointer semantics. If you check for Pandora API errors, update your code:
+
+**Before (no longer works):**
+
+```go
+var pe responses.PandoraError
+if errors.As(err, &pe) { ... }
+```
+
+**After:**
+
+```go
+var pe *responses.PandoraError
+if errors.As(err, &pe) { ... }
+```
+
+### Default HTTP Timeout
+
+`NewClient` now sets a 30-second HTTP timeout by default. Use `WithHTTPClient` to customize:
+
+```go
+client, err := gopiano.NewClient(gopiano.AndroidClient, gopiano.WithHTTPClient(&http.Client{
+    Timeout: 60 * time.Second,
+}))
+```
+
 ## Documentation & Community
 
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions

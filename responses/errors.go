@@ -121,19 +121,3 @@ type PandoraError struct {
 func (e *PandoraError) Error() string {
 	return fmt.Sprintf("Pandora Error: %d %s", e.Code, e.Message)
 }
-
-// GetErrorGuidance returns troubleshooting tips for common error codes.
-// This function provides contextual help to diagnose the root cause of API errors,
-// especially for generic error code 0 (INTERNAL).
-func GetErrorGuidance(code int) string {
-	switch code {
-	case 0:
-		return "Troubleshooting: Check that authentication prerequisites are met " +
-			"(partner login completed), verify all required parameters are valid, " +
-			"ensure calling from a US IP address, consider rate limiting if making " +
-			"frequent requests, note that this is an unofficial API that may have " +
-			"restrictions"
-	default:
-		return ""
-	}
-}

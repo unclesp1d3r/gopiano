@@ -311,6 +311,11 @@ func (c *Client) StationShareStation(
 	if len(emails) == 0 {
 		return errors.New("emails is required")
 	}
+	for _, email := range emails {
+		if err := validateEmail(email); err != nil {
+			return fmt.Errorf("invalid email in share list: %w", err)
+		}
+	}
 	requestData := requests.StationShareStation{
 		StationToken:  stationToken,
 		StationID:     stationID,

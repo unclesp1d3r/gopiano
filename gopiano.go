@@ -65,6 +65,13 @@ offset) during reads and writes.
 For best performance in highly concurrent scenarios, consider creating separate
 Client instances per goroutine to avoid lock contention.
 
+# Security
+
+This library uses Blowfish ECB encryption as required by the Pandora API protocol.
+ECB mode has known weaknesses (identical plaintext blocks produce identical ciphertext).
+Authentication tokens are transmitted in URL query parameters per API requirements.
+Always use "https://" protocol to protect credentials in transit.
+
 # Disclaimer
 
 This is a reference implementation for educational and research purposes. Users must have valid Pandora account credentials and are responsible for ensuring they have legal rights to access the Pandora API and comply with Pandora's Terms of Service. This software is provided "as-is" without warranty.
@@ -72,6 +79,7 @@ This is a reference implementation for educational and research purposes. Users 
 package gopiano
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -142,15 +150,7 @@ var AndroidClient = ClientDescription{ //nolint:gochecknoglobals,gosec // export
 // DefaultAndroidClient returns a fresh copy of the Android client description.
 // Use this instead of the AndroidClient global variable to avoid accidental mutation of shared state.
 func DefaultAndroidClient() ClientDescription {
-	return ClientDescription{ //nolint:gosec // partner credentials are public, not user secrets
-		DeviceModel: "android-generic",
-		Username:    "android",
-		Password:    "AC7IBG09A3DTSYM4R41UJWL07VLN8JI7",
-		BaseURL:     "tuner.pandora.com/services/json/",
-		EncryptKey:  "6#26FRL$ZWD",
-		DecryptKey:  "R=U!LH$O2B#",
-		Version:     "5",
-	}
+	return AndroidClient
 }
 
 // Client represents a Pandora client.
@@ -195,13 +195,6 @@ func WithTimeout(d time.Duration) Option {
 func NewClient(d ClientDescription, opts ...Option) (*Client, error) {
 	client := &http.Client{
 		Timeout: 30 * time.Second, //nolint:mnd // reasonable default timeout
-		Transport: &http.Transport{
-			TLSHandshakeTimeout:   10 * time.Second, //nolint:mnd // reasonable TLS timeout
-			ResponseHeaderTimeout: 15 * time.Second, //nolint:mnd // reasonable header timeout
-			IdleConnTimeout:       90 * time.Second, //nolint:mnd // standard idle timeout
-			MaxIdleConns:          10,               //nolint:mnd // reasonable pool size
-			MaxIdleConnsPerHost:   10,               //nolint:mnd // single host API
-		},
 	}
 	encrypter, err := blowfish.NewCipher([]byte(d.EncryptKey))
 	if err != nil {
@@ -226,10 +219,6 @@ func NewClient(d ClientDescription, opts ...Option) (*Client, error) {
 // encrypt encrypts a string using Blowfish in ECB mode.
 // Many methods of the Pandora API take their JSON data as Blowfish encrypted data.
 // The key for the encryption is provided by the ClientDescription.
-//
-// SECURITY: ECB mode is weak because identical plaintext blocks produce identical
-// ciphertext blocks, enabling pattern analysis. This is a Pandora API protocol
-// requirement, not a design choice.
 func (c *Client) encrypt(data string) string {
 	if data == "" {
 		return ""
@@ -253,10 +242,6 @@ func (c *Client) encrypt(data string) string {
 // decrypt decrypts a string using Blowfish in ECB mode.
 // Some data returned from the Pandora API is encrypted. This decrypts it.
 // The key for the decryption is provided by the ClientDescription.
-//
-// SECURITY: ECB mode is weak because identical plaintext blocks produce identical
-// ciphertext blocks, enabling pattern analysis. This is a Pandora API protocol
-// requirement, not a design choice.
 func (c *Client) decrypt(data string) (string, error) {
 	if data == "" {
 		return "", nil
@@ -287,9 +272,6 @@ func (c *Client) decrypt(data string) (string, error) {
 // the "method" url argument and specifies the remote procedure to call, body is an io.Reader
 // to be passed directly into http.Post, and data is to be passed to json.Unmarshal to parse
 // the JSON response.
-//
-// SECURITY: Using "http://" transmits data in plaintext, including auth tokens in URL
-// query parameters. Always use "https://" to protect credentials in transit.
 func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body io.Reader, data any) error {
 	// Check for context cancellation before starting
 	select {
@@ -339,43 +321,35 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	}
 	defer resp.Body.Close()
 
-	var errResp responses.PandoraError
 	const maxResponseSize = 1 << 20 // 1 MB
 	responseBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize))
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(responseBody, &errResp)
-	if err != nil {
-		return err
-	}
 
-	if errResp.Stat == "fail" {
+	if bytes.Contains(responseBody, []byte(`"stat":"fail"`)) {
+		var errResp responses.PandoraError
+		err = json.Unmarshal(responseBody, &errResp)
+		if err != nil {
+			return err
+		}
 		if message, ok := responses.ErrorCodeMap[errResp.Code]; ok {
 			errResp.Message = message
-		}
-		// Provide additional troubleshooting guidance for error code 0 (INTERNAL)
-		if errResp.Code == 0 {
-			guidance := responses.GetErrorGuidance(errResp.Code)
-			if guidance != "" {
-				errResp.Message = errResp.Message + ". " + guidance
-			}
 		}
 		return &errResp
 	}
 
-	err = json.Unmarshal(responseBody, &data)
-	if err != nil {
-		return err
+	if data != nil {
+		err = json.Unmarshal(responseBody, &data)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 // BlowfishCall first encrypts the body before calling PandoraCall.
 // Arguments are identical to PandoraCall.
-//
-// SECURITY: Using "http://" transmits data in plaintext, including auth tokens in URL
-// query parameters. Always use "https://" to protect credentials in transit.
 func (c *Client) BlowfishCall(ctx context.Context, protocol, method string, body io.Reader, data any) error {
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
@@ -410,8 +384,7 @@ func blowfishCallVoid(ctx context.Context, c *Client, method string, request any
 		return err
 	}
 	encrypted := strings.NewReader(c.encrypt(string(data)))
-	var resp any
-	return c.PandoraCall(ctx, "https://", method, encrypted, &resp)
+	return c.PandoraCall(ctx, "https://", method, encrypted, nil)
 }
 
 // GetSyncTime calculates the SyncTime for each call based on the timeOffset.
