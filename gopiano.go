@@ -322,9 +322,12 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	defer resp.Body.Close()
 
 	const maxResponseSize = 1 << 20 // 1 MB
-	responseBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize))
+	responseBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize+1))
 	if err != nil {
 		return err
+	}
+	if len(responseBody) > maxResponseSize {
+		return errors.New("response body exceeds 1 MB limit")
 	}
 
 	if bytes.Contains(responseBody, []byte(`"stat":"fail"`)) {
@@ -340,7 +343,7 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	}
 
 	if data != nil {
-		err = json.Unmarshal(responseBody, &data)
+		err = json.Unmarshal(responseBody, data)
 		if err != nil {
 			return err
 		}
