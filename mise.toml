@@ -9,7 +9,7 @@ uv                = "latest"
 
 # Many of these settings are defaults, but we are explicit in case they change in the future and to make it clear to users what is enabled.
 [settings]
-idiomatic_version_file_enable_tools = ["python", "go"]
+idiomatic_version_file_enable_tools = [ "python", "go" ]
 env_cache                           = true
 exec_auto_install                   = true
 github_attestations                 = true
