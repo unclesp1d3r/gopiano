@@ -1,6 +1,6 @@
 [tools]
 git-cliff         = "2.12.0"
-go                = "latest"
+go                = "1.25.0"
 golangci-lint     = "2.11.3"
 just              = "1.46.0"
 "pipx:pre-commit" = "4.5.1"
