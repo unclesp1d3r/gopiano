@@ -95,9 +95,10 @@ These methods handle:
 
 The library uses a custom error type for Pandora API errors:
 
-- **`PandoraError`**: Defined in `responses/responses.go`, implements the `error` interface
+- **`PandoraError`**: Defined in `responses/errors.go`, implements the `error` interface with pointer receiver
 - **`ErrorCodeMap`**: Maps Pandora API error codes to human-readable error messages
-- **Error Detection**: `PandoraCall()` checks for `"stat": "fail"` in responses and converts them to `PandoraError` types
+- **Error Detection**: `PandoraCall()` uses `bytes.Contains` to check for `"stat":"fail"` and converts to `*PandoraError`
+- **Usage**: Use `var pe *responses.PandoraError` with `errors.As(err, &pe)` to check for API errors
 
 ### Naming Conventions
 
