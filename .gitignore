@@ -182,4 +182,4 @@ docs/plans
 .kiro/specs/*
 .worktrees/
 todos/*.md
-
+**/*.local.md
