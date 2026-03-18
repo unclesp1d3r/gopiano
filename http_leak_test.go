@@ -1,7 +1,6 @@
 package gopiano
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -41,21 +40,33 @@ func TestHTTPLeak(t *testing.T) {
 	// Make multiple HTTP calls to test for resource leaks
 	const numCalls = 50
 	for i := range numCalls {
-		var result interface{}
-		err := client.PandoraCall(context.Background(), "http://", "test.method", strings.NewReader("{}"), &result)
+		var result any
+		err := client.PandoraCall(t.Context(), "http://", "test.method", strings.NewReader("{}"), &result)
 		if err != nil {
 			t.Logf("Call %d failed (expected for test): %v", i, err)
 			// This is expected to fail due to the mock response, but we're testing resource cleanup
 		}
 	}
 
-	// Allow some time for cleanup
+	// Wait for goroutines to settle using a retry loop instead of a fixed sleep
 	runtime.GC()
-	time.Sleep(100 * time.Millisecond)
-	runtime.GC()
+	var finalGoroutines int
+	const (
+		maxRetries     = 10
+		retryInterval  = 50 * time.Millisecond
+		maxAllowedDiff = 10
+	)
+	for attempt := range maxRetries {
+		runtime.GC()
+		finalGoroutines = runtime.NumGoroutine()
+		if finalGoroutines-initialGoroutines <= maxAllowedDiff {
+			break
+		}
+		if attempt < maxRetries-1 {
+			time.Sleep(retryInterval)
+		}
+	}
 
-	// Check that we haven't leaked goroutines
-	finalGoroutines := runtime.NumGoroutine()
 	goroutineDiff := finalGoroutines - initialGoroutines
 
 	// Allow for some variance in goroutine count, but significant growth indicates a leak
@@ -104,8 +115,8 @@ func TestHTTPBodyCloseDirectly(t *testing.T) {
 	}
 
 	// Test a simple call that should succeed
-	var result interface{}
-	err = client.PandoraCall(context.Background(), "http://", "test.method", strings.NewReader("{}"), &result)
+	var result any
+	err = client.PandoraCall(t.Context(), "http://", "test.method", strings.NewReader("{}"), &result)
 	// We expect this to work with our mock server
 	if err != nil {
 		t.Logf("Call completed with: %v", err)

@@ -1,0 +1,21 @@
+[tools]
+git-cliff         = "2.12.0"
+go                = "1.26.1"
+golangci-lint     = "2.11.3"
+just              = "1.46.0"
+"pipx:pre-commit" = "4.5.1"
+python            = "latest"
+uv                = "latest"
+
+# Many of these settings are defaults, but we are explicit in case they change in the future and to make it clear to users what is enabled.
+[settings]
+idiomatic_version_file_enable_tools = [ "python", "go" ]
+env_cache                           = true
+exec_auto_install                   = true
+github_attestations                 = true
+lockfile                            = true
+pin                                 = true
+slsa                                = true
+
+[settings.pipx]
+uvx = true

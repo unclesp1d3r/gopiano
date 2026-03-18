@@ -65,6 +65,13 @@ offset) during reads and writes.
 For best performance in highly concurrent scenarios, consider creating separate
 Client instances per goroutine to avoid lock contention.
 
+# Security
+
+This library uses Blowfish ECB encryption as required by the Pandora API protocol.
+ECB mode has known weaknesses (identical plaintext blocks produce identical ciphertext).
+Authentication tokens are transmitted in URL query parameters per API requirements.
+Always use "https://" protocol to protect credentials in transit.
+
 # Disclaimer
 
 This is a reference implementation for educational and research purposes. Users must have valid Pandora account credentials and are responsible for ensuring they have legal rights to access the Pandora API and comply with Pandora's Terms of Service. This software is provided "as-is" without warranty.
@@ -104,22 +111,32 @@ var emailRegex = regexp.MustCompile(
 
 // ClientDescription describes a particular type of client to emulate.
 type ClientDescription struct {
+	// DeviceModel is the device identifier sent to the Pandora API (e.g., "android-generic").
 	DeviceModel string
-	Username    string
-	Password    string
-	BaseURL     string
-	EncryptKey  string
-	DecryptKey  string
-	Version     string
+	// Username is the partner-level username used during partner authentication.
+	Username string
+	// Password is the partner-level password used during partner authentication.
+	Password string
+	// BaseURL is the base URL for the Pandora API (e.g., "tuner.pandora.com/services/json/").
+	BaseURL string
+	// EncryptKey is the Blowfish key used to encrypt outgoing request payloads.
+	EncryptKey string
+	// DecryptKey is the Blowfish key used to decrypt incoming response payloads (e.g., syncTime).
+	DecryptKey string
+	// Version is the Pandora API protocol version (e.g., "5").
+	Version string
 }
 
 // AndroidClient is the data for the Android client.
+//
+// Deprecated: AndroidClient is a mutable global variable. Use DefaultAndroidClient() instead,
+// which returns a fresh copy and avoids accidental mutation of shared state.
 //
 // SECURITY NOTE: These are partner-level credentials for the unofficial Pandora API,
 // not user credentials. They are publicly documented and required for API communication.
 // User credentials (email/password) are transmitted separately and securely over HTTPS.
 // These keys are used for Blowfish encryption of request payloads as required by the API protocol.
-var AndroidClient = ClientDescription{ //nolint:gochecknoglobals // exported by design
+var AndroidClient = ClientDescription{ //nolint:gochecknoglobals,gosec // exported by design; partner credentials are public, not user secrets
 	DeviceModel: "android-generic",
 	Username:    "android",
 	Password:    "AC7IBG09A3DTSYM4R41UJWL07VLN8JI7",
@@ -127,6 +144,12 @@ var AndroidClient = ClientDescription{ //nolint:gochecknoglobals // exported by 
 	EncryptKey:  "6#26FRL$ZWD",
 	DecryptKey:  "R=U!LH$O2B#",
 	Version:     "5",
+}
+
+// DefaultAndroidClient returns a fresh copy of the Android client description.
+// Use this instead of the AndroidClient global variable to avoid accidental mutation of shared state.
+func DefaultAndroidClient() ClientDescription {
+	return AndroidClient
 }
 
 // Client represents a Pandora client.
@@ -141,9 +164,10 @@ type Client struct {
 
 	// Immutable after construction (no mutex needed for these)
 	description ClientDescription
-	http        *http.Client
-	encrypter   *blowfish.Cipher
-	decrypter   *blowfish.Cipher
+	// http uses the default TLS configuration; no certificate pinning is performed.
+	http      *http.Client
+	encrypter *blowfish.Cipher
+	decrypter *blowfish.Cipher
 
 	// Mutable state (protected by mu)
 	timeOffset       time.Duration
@@ -153,9 +177,31 @@ type Client struct {
 	userID           string
 }
 
-// NewClient creates a new Client with specified ClientDescription.
-func NewClient(d ClientDescription) (*Client, error) {
-	client := new(http.Client)
+// Option configures a Client. Use With* functions to create Options.
+type Option func(*Client)
+
+// WithHTTPClient replaces the default HTTP client entirely.
+// If hc is nil, the option is a no-op.
+// Note: If used with WithTimeout, apply WithHTTPClient first.
+func WithHTTPClient(hc *http.Client) Option {
+	return func(c *Client) {
+		if hc != nil {
+			c.http = hc
+		}
+	}
+}
+
+// WithTimeout sets the HTTP client timeout. This modifies whatever HTTP client
+// is currently configured, including one provided by WithHTTPClient.
+func WithTimeout(d time.Duration) Option {
+	return func(c *Client) { c.http.Timeout = d }
+}
+
+// NewClient creates a new Client with specified ClientDescription and optional configuration.
+func NewClient(d ClientDescription, opts ...Option) (*Client, error) {
+	client := &http.Client{
+		Timeout: 30 * time.Second, //nolint:mnd // reasonable default timeout
+	}
 	encrypter, err := blowfish.NewCipher([]byte(d.EncryptKey))
 	if err != nil {
 		return nil, err
@@ -164,15 +210,19 @@ func NewClient(d ClientDescription) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
+	c := &Client{
 		description: d,
 		http:        client,
 		encrypter:   encrypter,
 		decrypter:   decrypter,
-	}, nil
+	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c, nil
 }
 
-// Blowfish encrypts a string in ECB mode.
+// encrypt encrypts a string using Blowfish in ECB mode.
 // Many methods of the Pandora API take their JSON data as Blowfish encrypted data.
 // The key for the encryption is provided by the ClientDescription.
 func (c *Client) encrypt(data string) string {
@@ -195,7 +245,7 @@ func (c *Client) encrypt(data string) string {
 	return result.String()
 }
 
-// Blowfish decrypts a string in ECB mode.
+// decrypt decrypts a string using Blowfish in ECB mode.
 // Some data returned from the Pandora API is encrypted. This decrypts it.
 // The key for the decryption is provided by the ClientDescription.
 func (c *Client) decrypt(data string) (string, error) {
@@ -236,6 +286,9 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	default:
 	}
 
+	// Auth tokens are passed as URL query parameters because the Pandora API
+	// protocol requires them there (the encrypted request body carries payload
+	// data, not authentication). Always use "https://" so tokens are protected.
 	urlArgs := url.Values{
 		"method": {method},
 	}
@@ -274,33 +327,38 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 	}
 	defer resp.Body.Close()
 
-	var errResp responses.PandoraError
-	responseBody, err := io.ReadAll(resp.Body)
+	const maxResponseSize = 1 << 20 // 1 MB
+	responseBody, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize+1))
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(responseBody, &errResp)
-	if err != nil {
-		return err
+	if len(responseBody) > maxResponseSize {
+		return errors.New("response body exceeds 1 MB limit")
 	}
 
-	if errResp.Stat == "fail" {
+	// Check for API error using a lightweight struct to avoid brittle substring matching.
+	var statCheck struct {
+		Stat string `json:"stat"`
+	}
+	if err := json.Unmarshal(responseBody, &statCheck); err != nil {
+		return err
+	}
+	if statCheck.Stat == "fail" {
+		var errResp responses.PandoraError
+		if err := json.Unmarshal(responseBody, &errResp); err != nil {
+			return err
+		}
 		if message, ok := responses.ErrorCodeMap[errResp.Code]; ok {
 			errResp.Message = message
 		}
-		// Provide additional troubleshooting guidance for error code 0 (INTERNAL)
-		if errResp.Code == 0 {
-			guidance := responses.GetErrorGuidance(errResp.Code)
-			if guidance != "" {
-				errResp.Message = errResp.Message + ". " + guidance
-			}
-		}
-		return errResp
+		return &errResp
 	}
 
-	err = json.Unmarshal(responseBody, &data)
-	if err != nil {
-		return err
+	if data != nil {
+		err = json.Unmarshal(responseBody, data)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -314,6 +372,34 @@ func (c *Client) BlowfishCall(ctx context.Context, protocol, method string, body
 	}
 	encrypted := strings.NewReader(c.encrypt(string(bodyBytes)))
 	return c.PandoraCall(ctx, protocol, method, encrypted, data)
+}
+
+// blowfishCallJSON marshals the request, encrypts it, calls the API, and unmarshals the response.
+// This is an internal generic helper that eliminates the repeated marshal-encrypt-call-unmarshal
+// boilerplate found in most API methods.
+func blowfishCallJSON[Resp any](ctx context.Context, c *Client, method string, request any) (*Resp, error) {
+	data, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	encrypted := strings.NewReader(c.encrypt(string(data)))
+	var resp Resp
+	err = c.PandoraCall(ctx, "https://", method, encrypted, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// blowfishCallVoid marshals the request, encrypts it, and calls the API with no response parsing.
+// This is an internal helper for API methods that return only an error with no meaningful response body.
+func blowfishCallVoid(ctx context.Context, c *Client, method string, request any) error {
+	data, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+	encrypted := strings.NewReader(c.encrypt(string(data)))
+	return c.PandoraCall(ctx, "https://", method, encrypted, nil)
 }
 
 // GetSyncTime calculates the SyncTime for each call based on the timeOffset.
@@ -334,30 +420,30 @@ func validateEmail(email string) error {
 	return nil
 }
 
-// validatePartnerAuthToken checks if partnerAuthToken is set and returns an error if missing.
+// getPartnerAuthToken returns the partner auth token under the read lock, or an error if missing.
 // This is used by methods that require partner authentication (e.g., AuthUserLogin, UserCreateUser).
-func (c *Client) validatePartnerAuthToken(operation string) error {
+func (c *Client) getPartnerAuthToken(operation string) (string, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.partnerAuthToken == "" {
-		return fmt.Errorf(
+		return "", fmt.Errorf(
 			"partner authentication token missing: must call AuthPartnerLogin() first to establish a partner session before %s",
 			operation,
 		)
 	}
-	return nil
+	return c.partnerAuthToken, nil
 }
 
-// validateUserAuthToken checks if userAuthToken is set and returns an error if missing.
+// getUserAuthToken returns the user auth token under the read lock, or an error if missing.
 // This is used by methods that require user authentication (e.g., UserGetStationList, StationGetPlaylist).
-func (c *Client) validateUserAuthToken(operation string) error {
+func (c *Client) getUserAuthToken(operation string) (string, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.userAuthToken == "" {
-		return fmt.Errorf(
+		return "", fmt.Errorf(
 			"user authentication token missing: must call AuthUserLogin() or UserCreateUser() first to establish a user session before %s",
 			operation,
 		)
 	}
-	return nil
+	return c.userAuthToken, nil
 }

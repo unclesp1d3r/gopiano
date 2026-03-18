@@ -26,11 +26,11 @@ This structure ensures that the library remains a thin wrapper, not an abstracti
 
 ## Codebase Structure
 
-- **Core Client**: `gopiano.go` - Client struct, encryption/decryption, `PandoraCall`, `BlowfishCall`
-- **Request Types**: `requests/requests.go` - Structs for JSON marshaling (mirror Pandora API exactly)
-- **Response Types**: `responses/responses.go` - Structs for JSON unmarshaling (mirror Pandora API exactly)
+- **Core Client**: `gopiano.go` - Client struct, encryption/decryption, `PandoraCall`, `BlowfishCall`, generic helpers
+- **Request Types**: `requests/` - Split by domain: `auth.go`, `station.go`, `user.go`, `misc.go`
+- **Response Types**: `responses/` - Split by domain: `errors.go`, `common.go`, `auth.go`, `station.go`, `user.go`
 - **Feature Files**: `auth.go`, `station.go`, `user.go`, `misc.go` - Client methods organized by domain
-- **Tests**: `*_test.go` files (currently minimal coverage)
+- **Tests**: `*_test.go` files - table-driven tests for missing-token validation
 
 ## Key Components
 
@@ -57,7 +57,7 @@ The `ClientDescription` struct describes a particular type of client to emulate,
 
 ### AndroidClient
 
-The `AndroidClient` global variable provides a pre-configured `ClientDescription` for Android device emulation. This is the standard client configuration used by the library.
+The `AndroidClient` global variable provides a pre-configured `ClientDescription` for Android device emulation. `DefaultAndroidClient()` returns a fresh copy and is preferred over the mutable global.
 
 ### Encryption
 
@@ -70,25 +70,35 @@ The library uses Blowfish ECB (Electronic Codebook) mode encryption for API comm
 
 ### API Interaction Patterns
 
-The library provides two main methods for API interaction:
+The library provides two public methods and two internal generic helpers for API interaction:
 
 - **`PandoraCall()`**: Basic HTTP POST method for unencrypted API calls. Handles URL construction, authentication tokens, and response parsing.
 - **`BlowfishCall()`**: Wrapper around `PandoraCall()` that first encrypts the request body using Blowfish encryption before sending.
+- **`blowfishCallJSON[Resp]()`**: Internal generic helper that marshals, encrypts, calls, and unmarshals in one step. Used by most API methods.
+- **`blowfishCallVoid()`**: Internal helper for API methods that return only an error with no response body.
 
-Both methods handle:
+These methods handle:
 
 - URL construction with query parameters (method, partner_id, user_id, auth_token)
 - HTTP request creation with proper headers (User-Agent: "gopiano", Content-Type: "text/plain")
 - Response parsing and error handling
-- Pandora API error detection and conversion to `PandoraError` types
+- Pandora API error detection and conversion to `*PandoraError` types
+
+### Functional Options
+
+`NewClient` accepts optional `Option` arguments:
+
+- `WithHTTPClient(hc)` - Replace the default HTTP client
+- `WithTimeout(d)` - Set timeout on the default HTTP client
 
 ### Error Handling
 
 The library uses a custom error type for Pandora API errors:
 
-- **`PandoraError`**: Defined in `responses/responses.go`, implements the `error` interface
+- **`PandoraError`**: Defined in `responses/errors.go`, implements the `error` interface with pointer receiver
 - **`ErrorCodeMap`**: Maps Pandora API error codes to human-readable error messages
-- **Error Detection**: `PandoraCall()` checks for `"stat": "fail"` in responses and converts them to `PandoraError` types
+- **Error Detection**: `PandoraCall()` uses `bytes.Contains` to check for `"stat":"fail"` and converts to `*PandoraError`
+- **Usage**: Use `var pe *responses.PandoraError` with `errors.As(err, &pe)` to check for API errors
 
 ### Naming Conventions
 
@@ -119,25 +129,25 @@ Structs are named after their corresponding API methods:
 
 When adding a new Pandora API method:
 
-1. **Add Request Struct** (in `requests/requests.go`):
+1. **Add Request Struct** (in the appropriate `requests/*.go` domain file):
 
    ```go
    // MethodName represents the request data for api.methodName.
-   // Note: Add this struct to github.com/unclesp1d3r/gopiano/requests/requests.go
    type MethodName struct {
-       FieldName string `json:"fieldName"` // Match Pandora API exactly
-       SyncTime  int    `json:"syncTime"`  // Required for authenticated calls
+       FieldName     string `json:"fieldName"` // Match Pandora API exactly
+       UserAuthToken string `json:"userAuthToken"`
+       SyncTime      int    `json:"syncTime"`
    }
    ```
 
-2. **Add Response Struct** (in `responses/responses.go`):
+2. **Add Response Struct** (in the appropriate `responses/*.go` domain file):
 
    ```go
    // MethodName represents the response from api.methodName.
-   // Note: Add this struct to github.com/unclesp1d3r/gopiano/responses/responses.go
    type MethodName struct {
-       Stat string `json:"stat"` // "ok" or "fail"
-       // ... other fields matching Pandora API exactly
+       Result struct {
+           // ... fields matching Pandora API exactly
+       } `json:"result"`
    }
    ```
 
@@ -145,24 +155,21 @@ When adding a new Pandora API method:
 
    ```go
    // MethodName does X. Calls API method "api.methodName".
-   func (c *Client) MethodName(...) (*responses.MethodName, error) {
+   func (c *Client) MethodName(ctx context.Context, ...) (*responses.MethodName, error) {
+       userAuthToken, err := c.getUserAuthToken("doing X")
+       if err != nil {
+           return nil, err
+       }
        requestData := requests.MethodName{
            // ... populate fields
-           SyncTime: c.GetSyncTime(), // For authenticated calls
+           UserAuthToken: userAuthToken,
+           SyncTime:      c.GetSyncTime(),
        }
-       requestDataEncoded, err := json.Marshal(requestData)
+       resp, err := blowfishCallJSON[responses.MethodName](ctx, c, "api.methodName", requestData)
        if err != nil {
-           return nil, err
+           return nil, fmt.Errorf("do X: %w", err)
        }
-       requestDataReader := bytes.NewReader(requestDataEncoded)
-
-       var resp responses.MethodName
-       // Use BlowfishCall for encrypted requests, PandoraCall for plain
-       err = c.BlowfishCall("http://", "api.methodName", requestDataReader, &resp)
-       if err != nil {
-           return nil, err
-       }
-       return &resp, nil
+       return resp, nil
    }
    ```
 
@@ -178,13 +185,14 @@ When adding a new Pandora API method:
 - **Wrap errors**: Use `fmt.Errorf("context: %w", err)` for error wrapping
 - **Handle immediately**: Don't defer error handling; check and return errors immediately
 - **Avoid panics**: No panics outside tests
-- **API errors**: Pandora API errors are returned as `responses.PandoraError` (implements `error`)
+- **API errors**: Pandora API errors are returned as `*responses.PandoraError` (pointer). Use `errors.As(err, &pe)` with `var pe *responses.PandoraError`
 
 ### Authentication Flow
 
 1. Call `AuthPartnerLogin()` to get partner credentials
 2. Call `AuthUserLogin(username, password)` to get user credentials
-3. Subsequent calls use `c.userAuthToken` and `c.userID` automatically via `PandoraCall`
+3. Subsequent calls use `getUserAuthToken()`/`getPartnerAuthToken()` to read tokens under lock
+4. `PandoraCall` reads partner/user IDs under lock for URL construction
 
 ## Code Quality Standards
 
@@ -204,16 +212,16 @@ When adding a new Pandora API method:
 
 ### Types
 
-- **Prefer explicit structs**: Avoid `interface{}` unless type assertions are intentional
+- **Prefer explicit structs**: Avoid `any`/`interface{}` unless type assertions are intentional
 - **Constants**: Define constants for protocol-level values (reject magic numbers)
 - **No GOPATH**: Keep GOPATH usage minimal; use modules
-- **Module path**: When adding or editing API structs, use the module path `github.com/unclesp1d3r/gopiano` - request structs go in `github.com/unclesp1d3r/gopiano/requests/requests.go` and response structs go in `github.com/unclesp1d3r/gopiano/responses/responses.go` (see [Project Context](#project-context) for module details)
+- **Module path**: When adding or editing API structs, use the module path `github.com/unclesp1d3r/gopiano` - request structs go in the appropriate `requests/*.go` domain file and response structs go in the appropriate `responses/*.go` domain file (see [Project Context](#project-context) for module details)
 
 ### Context
 
-- **Long-running functions**: Accept `context.Context` as first parameter
-- **Respect deadlines**: Check context cancellation and deadlines
-- **Current limitation**: `PandoraCall` uses `context.Background()` - consider making it configurable
+- **All public methods**: Accept `context.Context` as first parameter
+- **Context propagation**: `PandoraCall`, `BlowfishCall`, and generic helpers all propagate context
+- **Cancellation**: `PandoraCall` checks `ctx.Done()` before starting the HTTP request
 
 ### Concurrency
 
@@ -245,12 +253,13 @@ When adding a new Pandora API method:
 ### Adding a New Station Method
 
 1. Check Pandora API docs for method signature
-2. Add request struct to `requests/requests.go`
-3. Add response struct to `responses/responses.go`
-4. Add method to `station.go` following existing patterns
-5. Use `BlowfishCall` for encrypted requests, `PandoraCall` for plain
+2. Add request struct to `requests/station.go`
+3. Add response struct to `responses/station.go`
+4. Add method to `station.go` using `blowfishCallJSON` or `blowfishCallVoid` helpers
+5. Use `getUserAuthToken()` to obtain token under lock
 6. Include `SyncTime: c.GetSyncTime()` for authenticated calls
-7. Add doc comment describing what the method does
+7. Add input validation for required string parameters
+8. Add doc comment describing what the method does
 
 ### Modifying Existing Methods
 
@@ -287,6 +296,8 @@ The project uses `golangci-lint` for code quality enforcement:
   - `//nolint:staticcheck` for required but deprecated packages
   - `//nolint:tagliatelle` for JSON tag names that match API typos
   - `//nolint:gochecknoglobals` for intentionally exported global variables
+  - `//nolint:gosec` for `json.Marshal` of structs containing partner credentials or encrypted passwords
+  - `//nolint:mnd` for magic numbers that are reasonable defaults (e.g., timeout durations)
 
 ## Documentation Standards
 
@@ -350,3 +361,7 @@ just test-coverage-func      # Show function-level coverage
 ```
 
 See the `justfile` for all available recipes. Run `just` without arguments to see the full list.
+
+## Agent Rules <!-- tessl-managed -->
+
+@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)

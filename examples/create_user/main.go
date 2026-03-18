@@ -25,7 +25,7 @@ func main() {
 
 	// Step 1: Create a client using the Android client description.
 	// This provides the necessary encryption keys and device model information.
-	client, err := gopiano.NewClient(gopiano.AndroidClient)
+	client, err := gopiano.NewClient(gopiano.DefaultAndroidClient())
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}

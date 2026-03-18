@@ -53,6 +53,7 @@ Only after both steps can you call other API methods that require user authentic
 package main
 
 import (
+ "context"
  "log"
 
  "github.com/unclesp1d3r/gopiano"
@@ -66,19 +67,19 @@ func main() {
  }
 
  // Step 1: Partner login (REQUIRED FIRST)
- _, err = client.AuthPartnerLogin()
+ _, err = client.AuthPartnerLogin(context.Background())
  if err != nil {
   log.Fatal(err)
  }
 
  // Step 2: User login (for existing users)
- _, err = client.AuthUserLogin("user@example.com", "password")
+ _, err = client.AuthUserLogin(context.Background(), "user@example.com", "password")
  if err != nil {
   log.Fatal(err)
  }
 
  // Now you can call other methods
- stations, err := client.UserGetStationList(false)
+ stations, err := client.UserGetStationList(context.Background(), false)
  if err != nil {
   log.Fatal(err)
  }
@@ -105,6 +106,7 @@ The `UserCreateUser` function allows you to create new Pandora user accounts. Th
 package main
 
 import (
+ "context"
  "log"
 
  "github.com/unclesp1d3r/gopiano"
@@ -117,13 +119,13 @@ func main() {
  }
 
  // Step 1: Partner login (REQUIRED)
- _, err = client.AuthPartnerLogin()
+ _, err = client.AuthPartnerLogin(context.Background())
  if err != nil {
   log.Fatalf("Partner login failed: %v", err)
  }
 
  // Step 2: Create new user
- userResp, err := client.UserCreateUser(
+ userResp, err := client.UserCreateUser(context.Background(),
   "user@example.com",  // username: must be valid email
   "SecurePassword123",  // password
   "male",               // gender: must be "male" or "female"
@@ -318,6 +320,40 @@ The project is actively being improved with ongoing work on:
 - Comprehensive documentation
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help improve the project.
+
+## Breaking Changes
+
+### PandoraError Pointer Semantics
+
+`PandoraError` now uses pointer semantics. If you check for Pandora API errors, update your code:
+
+**Before (no longer works):**
+
+```go
+var pe responses.PandoraError
+if errors.As(err, &pe) { ... }
+```
+
+**After:**
+
+```go
+var pe *responses.PandoraError
+if errors.As(err, &pe) { ... }
+```
+
+### Default HTTP Timeout
+
+`NewClient` now sets a 30-second HTTP timeout by default. Use `WithHTTPClient` to customize:
+
+```go
+client, err := gopiano.NewClient(gopiano.AndroidClient, gopiano.WithHTTPClient(&http.Client{
+    Timeout: 60 * time.Second,
+}))
+```
+
+### Removed GetErrorGuidance
+
+`responses.GetErrorGuidance()` has been removed. Error code 0 troubleshooting guidance is now in the README [Troubleshooting](#troubleshooting) section.
 
 ## Documentation & Community
 

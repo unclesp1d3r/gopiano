@@ -15,25 +15,19 @@ import (
 // to the premium Pandora One service.
 // Calls API method "user.canSubscribe".
 func (c *Client) UserCanSubscribe(ctx context.Context) (*responses.UserCanSubscribe, error) {
-	if err := c.validateUserAuthToken("checking subscription status"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("checking subscription status")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.UserCanSubscribe{
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp responses.UserCanSubscribe
-	err = c.BlowfishCall(ctx, "https://", "user.canSubscribe", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.UserCanSubscribe](ctx, c, "user.canSubscribe", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("check subscription status: %w", err)
 	}
-
-	return &resp, nil
+	return resp, nil
 }
 
 // UserCreateUser creates a new Pandora user.
@@ -75,11 +69,12 @@ func (c *Client) UserCreateUser(
 	if countryCode != "US" {
 		return nil, fmt.Errorf("country code must be 'US', got: %s", countryCode)
 	}
-	if err := c.validatePartnerAuthToken("creating a user"); err != nil {
+	partnerAuthToken, err := c.getPartnerAuthToken("creating a user")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.UserCreateUser{
-		PartnerAuthToken: c.partnerAuthToken,
+		PartnerAuthToken: partnerAuthToken,
 		AccountType:      "registered",
 		RegisteredType:   "user",
 		Username:         username,
@@ -91,10 +86,14 @@ func (c *Client) UserCreateUser(
 		EmailOptin:       emailOptin,
 		SyncTime:         c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
+	requestDataEncoded, err := json.Marshal( //nolint:gosec // G117: password is encrypted via BlowfishCall + HTTPS
+		requestData,
+	)
+	requestData.Password = "" // Drop struct field reference
 	if err != nil {
 		return nil, err
 	}
+	defer clear(requestDataEncoded) // Zero marshaled bytes containing password
 	requestDataReader := bytes.NewReader(requestDataEncoded)
 	var resp responses.UserCreateUser
 	err = c.BlowfishCall(ctx, "https://", "user.createUser", requestDataReader, &resp)
@@ -114,21 +113,16 @@ func (c *Client) UserCreateUser(
 // UserEmailPassword resends the registration email.
 // Calls API method "user.emailPassword".
 func (c *Client) UserEmailPassword(ctx context.Context, username string) error {
-	if err := c.validatePartnerAuthToken("resending registration email"); err != nil {
+	partnerAuthToken, err := c.getPartnerAuthToken("resending registration email")
+	if err != nil {
 		return err
 	}
 	requestData := requests.UserEmailPassword{
 		Username:         username,
-		PartnerAuthToken: c.partnerAuthToken,
+		PartnerAuthToken: partnerAuthToken,
 		SyncTime:         c.GetSyncTime(),
 	}
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "user.emailPassword", requestDataReader, &resp); err != nil {
+	if err := blowfishCallVoid(ctx, c, "user.emailPassword", requestData); err != nil {
 		return fmt.Errorf("email password: %w", err)
 	}
 	return nil
@@ -138,25 +132,19 @@ func (c *Client) UserEmailPassword(ctx context.Context, username string) error {
 // Also see BookmarkAddArtistBookmark and BookmarkAddSongBookmark.
 // Calls API method "user.getBookmarks".
 func (c *Client) UserGetBookmarks(ctx context.Context) (*responses.UserGetBookmarks, error) {
-	if err := c.validateUserAuthToken("retrieving bookmarks"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("retrieving bookmarks")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.UserGetBookmarks{
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp responses.UserGetBookmarks
-	err = c.BlowfishCall(ctx, "https://", "user.getBookmarks", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.UserGetBookmarks](ctx, c, "user.getBookmarks", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("get bookmarks: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // UserGetStationList gets the list of a user's stations.
@@ -165,72 +153,61 @@ func (c *Client) UserGetStationList(
 	ctx context.Context,
 	includeStationArtURL bool,
 ) (*responses.UserGetStationList, error) {
-	if err := c.validateUserAuthToken("getting station list"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("getting station list")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.UserGetStationList{
-		UserAuthToken:        c.userAuthToken,
+		UserAuthToken:        userAuthToken,
 		SyncTime:             c.GetSyncTime(),
 		IncludeStationArtURL: includeStationArtURL,
 	}
-
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.UserGetStationList
-	err = c.BlowfishCall(ctx, "https://", "user.getStationList", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.UserGetStationList](ctx, c, "user.getStationList", requestData)
 	if err != nil {
 		return nil, fmt.Errorf("get station list: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // UserGetStationListChecksum returns the checksum of the user's station list.
 // Calls API method "user.getStationListChecksum".
 func (c *Client) UserGetStationListChecksum(ctx context.Context) (*responses.UserGetStationListChecksum, error) {
-	if err := c.validateUserAuthToken("getting station list checksum"); err != nil {
+	userAuthToken, err := c.getUserAuthToken("getting station list checksum")
+	if err != nil {
 		return nil, err
 	}
 	requestData := requests.UserGetStationListChecksum{
-		UserAuthToken: c.userAuthToken,
+		UserAuthToken: userAuthToken,
 		SyncTime:      c.GetSyncTime(),
 	}
-
-	requestDataEncoded, err := json.Marshal(requestData)
-	if err != nil {
-		return nil, err
-	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-
-	var resp responses.UserGetStationListChecksum
-	err = c.BlowfishCall(ctx, "https://", "user.getStationListChecksum", requestDataReader, &resp)
+	resp, err := blowfishCallJSON[responses.UserGetStationListChecksum](
+		ctx,
+		c,
+		"user.getStationListChecksum",
+		requestData,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("get station list checksum: %w", err)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
 // UserSetQuickMix selects the stations that should be in the special QuickMix station.
 // Calls API method "user.setQuickMix".
 func (c *Client) UserSetQuickMix(ctx context.Context, stationIDs []string) error {
-	if err := c.validateUserAuthToken("setting QuickMix"); err != nil {
-		return err
-	}
-	requestData := requests.UserSetQuickMix{
-		QuickMixStationIDs: stationIDs,
-		UserAuthToken:      c.userAuthToken,
-		SyncTime:           c.GetSyncTime(),
-	}
-	requestDataEncoded, err := json.Marshal(requestData)
+	userAuthToken, err := c.getUserAuthToken("setting QuickMix")
 	if err != nil {
 		return err
 	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "user.setQuickMix", requestDataReader, &resp); err != nil {
+	if len(stationIDs) == 0 {
+		return errors.New("stationIDs is required")
+	}
+	requestData := requests.UserSetQuickMix{
+		QuickMixStationIDs: stationIDs,
+		UserAuthToken:      userAuthToken,
+		SyncTime:           c.GetSyncTime(),
+	}
+	if err := blowfishCallVoid(ctx, c, "user.setQuickMix", requestData); err != nil {
 		return fmt.Errorf("set quick mix: %w", err)
 	}
 	return nil
@@ -239,21 +216,19 @@ func (c *Client) UserSetQuickMix(ctx context.Context, stationIDs []string) error
 // UserSleepSong marks a song to not be played again for 1 month.
 // Calls API method "user.sleepSong".
 func (c *Client) UserSleepSong(ctx context.Context, trackToken string) error {
-	if err := c.validateUserAuthToken("sleeping a song"); err != nil {
-		return err
-	}
-	requestData := requests.UserSleepSong{
-		TrackToken:    trackToken,
-		UserAuthToken: c.userAuthToken,
-		SyncTime:      c.GetSyncTime(),
-	}
-	requestDataEncoded, err := json.Marshal(requestData)
+	userAuthToken, err := c.getUserAuthToken("sleeping a song")
 	if err != nil {
 		return err
 	}
-	requestDataReader := bytes.NewReader(requestDataEncoded)
-	var resp any
-	if err = c.BlowfishCall(ctx, "https://", "user.sleepSong", requestDataReader, &resp); err != nil {
+	if trackToken == "" {
+		return errors.New("trackToken is required")
+	}
+	requestData := requests.UserSleepSong{
+		TrackToken:    trackToken,
+		UserAuthToken: userAuthToken,
+		SyncTime:      c.GetSyncTime(),
+	}
+	if err := blowfishCallVoid(ctx, c, "user.sleepSong", requestData); err != nil {
 		return fmt.Errorf("sleep song: %w", err)
 	}
 	return nil
