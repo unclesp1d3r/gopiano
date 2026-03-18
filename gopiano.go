@@ -79,7 +79,6 @@ This is a reference implementation for educational and research purposes. Users 
 package gopiano
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -182,11 +181,18 @@ type Client struct {
 type Option func(*Client)
 
 // WithHTTPClient replaces the default HTTP client entirely.
+// If hc is nil, the option is a no-op.
+// Note: If used with WithTimeout, apply WithHTTPClient first.
 func WithHTTPClient(hc *http.Client) Option {
-	return func(c *Client) { c.http = hc }
+	return func(c *Client) {
+		if hc != nil {
+			c.http = hc
+		}
+	}
 }
 
-// WithTimeout sets the timeout on the default HTTP client.
+// WithTimeout sets the HTTP client timeout. This modifies whatever HTTP client
+// is currently configured, including one provided by WithHTTPClient.
 func WithTimeout(d time.Duration) Option {
 	return func(c *Client) { c.http.Timeout = d }
 }
@@ -330,10 +336,16 @@ func (c *Client) PandoraCall(ctx context.Context, protocol, method string, body 
 		return errors.New("response body exceeds 1 MB limit")
 	}
 
-	if bytes.Contains(responseBody, []byte(`"stat":"fail"`)) {
+	// Check for API error using a lightweight struct to avoid brittle substring matching.
+	var statCheck struct {
+		Stat string `json:"stat"`
+	}
+	if err := json.Unmarshal(responseBody, &statCheck); err != nil {
+		return err
+	}
+	if statCheck.Stat == "fail" {
 		var errResp responses.PandoraError
-		err = json.Unmarshal(responseBody, &errResp)
-		if err != nil {
+		if err := json.Unmarshal(responseBody, &errResp); err != nil {
 			return err
 		}
 		if message, ok := responses.ErrorCodeMap[errResp.Code]; ok {

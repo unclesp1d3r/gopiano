@@ -25,9 +25,11 @@ type DateResponse struct {
 
 // GetDate converts the DateResponse to a time.Time object.
 // The 1900+Year offset follows Java's deprecated Date.getYear() convention,
-// which returns year minus 1900. The Pandora API uses this Java convention.
+// which returns year minus 1900. The Month+1 offset follows Java's deprecated
+// Date.getMonth() convention, which returns 0-indexed months (0=January).
+// The Pandora API uses these Java conventions.
 func (d DateResponse) GetDate() time.Time {
-	return time.Date(1900+d.Year, time.Month(d.Month), d.Date, d.Hours, d.Minutes, d.Seconds,
+	return time.Date(1900+d.Year, time.Month(d.Month+1), d.Date, d.Hours, d.Minutes, d.Seconds,
 		d.Nanos, time.FixedZone("Local Time", d.TimezoneOffset*60)) //nolint:mnd // 60 seconds per minute
 }
 

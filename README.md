@@ -351,6 +351,10 @@ client, err := gopiano.NewClient(gopiano.AndroidClient, gopiano.WithHTTPClient(&
 }))
 ```
 
+### Removed GetErrorGuidance
+
+`responses.GetErrorGuidance()` has been removed. Error code 0 troubleshooting guidance is now in the README [Troubleshooting](#troubleshooting) section.
+
 ## Documentation & Community
 
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
