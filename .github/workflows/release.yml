@@ -12,15 +12,12 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@5228313ee0372e111a38da051671ca30fc5a96db # v3.6.3
         with:
-          fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
+          install: true
+          cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run tests
         run: go test -race ./...
@@ -34,6 +31,6 @@ jobs:
           git-cliff --latest --strip header > CHANGELOG.md
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.6.1
         with:
           body_path: CHANGELOG.md
