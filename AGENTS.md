@@ -26,11 +26,11 @@ This structure ensures that the library remains a thin wrapper, not an abstracti
 
 ## Codebase Structure
 
-- **Core Client**: `gopiano.go` - Client struct, encryption/decryption, `PandoraCall`, `BlowfishCall`
-- **Request Types**: `requests/requests.go` - Structs for JSON marshaling (mirror Pandora API exactly)
-- **Response Types**: `responses/responses.go` - Structs for JSON unmarshaling (mirror Pandora API exactly)
+- **Core Client**: `gopiano.go` - Client struct, encryption/decryption, `PandoraCall`, `BlowfishCall`, generic helpers
+- **Request Types**: `requests/` - Split by domain: `auth.go`, `station.go`, `user.go`, `misc.go`
+- **Response Types**: `responses/` - Split by domain: `errors.go`, `common.go`, `auth.go`, `station.go`, `user.go`
 - **Feature Files**: `auth.go`, `station.go`, `user.go`, `misc.go` - Client methods organized by domain
-- **Tests**: `*_test.go` files (currently minimal coverage)
+- **Tests**: `*_test.go` files - table-driven tests for missing-token validation
 
 ## Key Components
 
@@ -57,7 +57,7 @@ The `ClientDescription` struct describes a particular type of client to emulate,
 
 ### AndroidClient
 
-The `AndroidClient` global variable provides a pre-configured `ClientDescription` for Android device emulation. This is the standard client configuration used by the library.
+The `AndroidClient` global variable provides a pre-configured `ClientDescription` for Android device emulation. `DefaultAndroidClient()` returns a fresh copy and is preferred over the mutable global.
 
 ### Encryption
 
